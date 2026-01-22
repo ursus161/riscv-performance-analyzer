@@ -19,7 +19,7 @@ python main.py programs/test.s
 
 - **Pipeline 5 stage-uri** cu detectare hazards
 - **Cache simulator** (LRU, configurable)
-- **Branch predictors** (2-bit, perceptron)
+- **Branch predictors** (2-bit, maybe perceptron)
 - **Stats** (CPI, hit rate, accuracy)
 
 ## Output Exemplu

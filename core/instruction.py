@@ -1,5 +1,4 @@
 #aici vreau sa imi definesc clasa instructiunii cu toate metodele definiitorii de riguoare
-from dis import Instruction
 
 
 class Instruction:
@@ -11,7 +10,7 @@ class Instruction:
         self.rs1 = rs1
         self.rs2 = rs2
         self.imm = imm
-
+        self._validate()
     def __str__(self):
         match self.opcode:
             case "add":
@@ -80,9 +79,10 @@ class Instruction:
 
 
 if __name__ == "__main__":
-    lw = Instruction("lw", )
+    lw = Instruction("lw",15,15,None, 20 )
     try:
         print(lw.isload())
         print(lw.isstore())
     except ValueError as e:
         print(e)
+
