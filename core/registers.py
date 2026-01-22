@@ -27,6 +27,8 @@ if __name__ == "__main__":
 
     try:
         registers = RegisterFile()
+        registers.write(13, 42)
+        registers.read(13)
         print(registers)
     except ValueError as ex:
         print(ex)

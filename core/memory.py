@@ -29,21 +29,6 @@ class Memory:
 
 
 if __name__ == "__main__":
-    mem = Memory(size=256)  # 256 words = 1KB
-
-    # Test 1: Scriere
-    mem.write(0, 42)
-    mem.write(4, 100)
-    mem.write(12, 255)
-
-    # Test 2: Citire
-    print(f"mem[0]:  {mem.read(0)}")  # 42
-    print(f"mem[4]:  {mem.read(4)}")  # 100
-    print(f"mem[12]: {mem.read(12)}")  # 255
-
-    # Test 3: Afisare
-    print(mem)  # Memorie: {0: 42, 4: 100, 12: 255}
-
-    # Test 4: Suprascrie
-    mem.write(4, 200)
-    print(f"mem[4] dupa update: {mem.read(4)}")  # 200
+    mem = Memory()
+    mem.write(9,4)
+    print(mem)
