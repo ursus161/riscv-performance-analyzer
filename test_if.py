@@ -3,7 +3,7 @@ from core.instruction import Instruction
 
 from core.registers import RegisterFile
 from core.memory import Memory
-from pipeline.stages import IFStage, IDStage, EXStage
+from pipeline.stages import IFStage, IDStage, EXStage, WBStage, MEMStage
 
 
 class MockPipeline:
@@ -16,7 +16,9 @@ class MockPipeline:
         self.stages = {
             'IF': IFStage(self),
             'ID': IDStage(self),
-            'EX': EXStage(self)
+            'EX': EXStage(self),
+            'MEM': MEMStage(self),
+            'WB': WBStage(self)
         }
 
 
@@ -30,6 +32,8 @@ pipeline = MockPipeline(instructions)
 if_stage = pipeline.stages['IF']
 id_stage = pipeline.stages['ID']
 ex_stage = pipeline.stages['EX']
+mem_stage= pipeline.stages['MEM']
+wb_stage = pipeline.stages['WB']
 
 print("ciclu 1")
 if_stage.execute()
@@ -59,6 +63,7 @@ if ex_stage.instruction:
     print(f"EX data: {ex_stage.data}")
 
 print("\nciclu4")
+mem_stage.execute()
 ex_stage.execute()
 id_stage.execute()
 if_stage.execute()
@@ -71,6 +76,8 @@ if ex_stage.instruction:
     print(f"EX data: {ex_stage.data}")
 
 print("\nciclu5")
+wb_stage.execute()
+mem_stage.execute()
 ex_stage.execute()
 id_stage.execute()
 if_stage.execute()

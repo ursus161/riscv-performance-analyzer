@@ -109,8 +109,55 @@ class EXStage(PipelineStage):
                     self.data['branch_target'] = self.pipeline.pc + self.instruction.imm
 
 
+class MEMStage(PipelineStage):
+
+    def __init__(self, pipeline):
+        super().__init__("MEM")
+        self.pipeline = pipeline
+
+    def execute(self):
+
+        self.instruction = self.pipeline.stages['EX'].instruction
+        prev_data = self.pipeline.stages['EX'].data
+        self.pipeline.stages['EX'].instruction = None
+
+        if self.instruction is None:
+            return
+
+        if self.instruction.isloadword():
+            address = prev_data['address']
+            self.data['result'] = self.pipeline.memory.read(address)
+
+        elif self.instruction.isstoreword():
+            address = prev_data['address']
+            value = prev_data['store_value']
+            self.pipeline.memory.write(address, value)
+
+        else:
+            self.data['result'] = prev_data.get('result')
+            #aici daca e instructiune ALU paseaza rez din EX mai departe doar
 
 
+class WBStage(PipelineStage):
+
+
+    def __init__(self, pipeline):
+        super().__init__("WB")
+        self.pipeline = pipeline
+
+    def execute(self):
+
+        self.instruction = self.pipeline.stages['MEM'].instruction
+        prev_data = self.pipeline.stages['MEM'].data
+        self.pipeline.stages['MEM'].instruction = None
+
+        if self.instruction is None:
+            return
+
+        if not self.instruction.isstoreword() and self.instruction.rd is not None:
+            result = prev_data.get('result', 0)
+            self.pipeline.registers.write(self.instruction.rd, result)
+            #asta e wb-ul efectiv
 
 if __name__ == "__main__":
   pass
