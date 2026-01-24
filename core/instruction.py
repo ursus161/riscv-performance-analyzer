@@ -11,6 +11,8 @@ class Instruction:
         self.rs2 = rs2
         self.imm = imm
         self._validate()
+
+
     def __str__(self):
         match self.opcode:
             case "add":
@@ -36,10 +38,10 @@ class Instruction:
             case _:
                 return f"{self.opcode} nu exista acest opcode"
 
-    def isload(self):
+    def isloadword(self):
         return self.opcode == "lw"
 
-    def isstore(self):
+    def isstoreword(self):
         return self.opcode == "sw"
 
     def ismemorydependent(self):
@@ -81,8 +83,8 @@ class Instruction:
 if __name__ == "__main__":
     lw = Instruction("lw",15,15,None, 20 )
     try:
-        print(lw.isload())
-        print(lw.isstore())
+        print(lw.isloadword())
+        print(lw.isstoreword())
     except ValueError as e:
         print(e)
 
