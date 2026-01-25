@@ -1,1 +1,2 @@
+Registrele: {1: 5, 2: 3}
 x3 este gresit, 0

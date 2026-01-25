@@ -20,17 +20,19 @@ class Pipeline:
         }
 
     def tick(self):
-
         self.stages['WB'].execute()
         self.stages['MEM'].execute()
         self.stages['EX'].execute()
         self.stages['ID'].execute()
         self.stages['IF'].execute()
 
+        if (ex_instr := self.stages['EX'].instruction) and ex_instr.is_branch():
+            if self.stages['EX'].data.get('branch_taken', False):
+                self.pc = self.stages['EX'].data['branch_target'] #daca s a luat branch ul, schimb pc ul
+
         self.cycle += 1
 
     def run(self, max_cycles=100):
-
         while self.cycle < max_cycles:
             self.tick()
 
@@ -39,16 +41,13 @@ class Pipeline:
             else:
                 break
 
-
         print(f"\nfinal state")
-        print(f"cicluri ceas: {self.cycle-1}")
+        print(f"cicluri ceas: {self.cycle}")
         print(f"registri: {self.registers}")
         print(f"memoria principala: {self.memory}")
 
     def is_done(self):
-
         return all(stage.instruction is None for stage in self.stages.values())
-        #adica fiecare stage nu face nimic, am None in fiecare
 
     def __str__(self):
         lines = [f"\n{'-' * 50}"]
@@ -61,6 +60,6 @@ class Pipeline:
             lines.append(f"{name:4}: {instr_str}")
 
             if stage.data:
-                lines.append(f" data: {stage.data}")
+                lines.append(f"      data: {stage.data}")
 
         return '\n'.join(lines)
