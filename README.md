@@ -12,7 +12,7 @@ Simuleaza un procesor RISC-V ciclu cu ciclu si arata exact unde se pierde timpul
 
 ## Rulare
 ```bash
-python main.py programs/test.s
+python test_if.py
 ```
 
 ## Features in progress

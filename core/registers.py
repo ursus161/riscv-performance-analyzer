@@ -10,7 +10,7 @@ class RegisterFile:
         return self.regs[reg_num]
 
     def write(self, reg_num, value):
-        #aici am testat si branchless (self.regs[reg_num]= value*(reg_num!=0) insa este cu 8-10% mai lent
+        #aici am testat si branchless (self.regs[reg_num]= value*(reg_num!=0) ) insa este cu 8-10% mai lent
         #plus ca mi ar fi scris si in x0
         if reg_num:
             self.regs[reg_num] = value
@@ -28,7 +28,6 @@ if __name__ == "__main__":
     try:
         registers = RegisterFile()
         registers.write(13, 42)
-        registers.read(13)
         print(registers)
     except ValueError as ex:
         print(ex)
