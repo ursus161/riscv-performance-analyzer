@@ -42,7 +42,7 @@ class Pipeline:
                 break
 
         print(f"\nfinal state")
-        print(f"cicluri ceas: {self.cycle}")
+        print(f"cicluri ceas: {self.cycle-1}")
         print(f"registri: {self.registers}")
         print(f"memoria principala: {self.memory}")
 

@@ -15,6 +15,7 @@ print(f"status: {'OK' if pipeline.registers.read(3) == 8 else 'FAIL'}")
 
 with open("test_rez.txt", "w") as g:
     g.write(f"{pipeline.registers}\n")
+    g.write(f"{pipeline.cycle-1} cicluri de ceas \n")
     if pipeline.registers.read(3) ==8:
         g.write(f"x3 este 8, cum trebuie")
     else:
