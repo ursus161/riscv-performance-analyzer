@@ -1,0 +1,66 @@
+from core.registers import RegisterFile
+from core.memory import Memory
+from pipeline.stages import IFStage, IDStage, EXStage, MEMStage, WBStage
+
+
+class Pipeline:
+    def __init__(self, instructions):
+        self.instructions = instructions
+        self.registers = RegisterFile()
+        self.memory = Memory()
+        self.pc = 0
+        self.cycle = 0
+
+        self.stages = {
+            'IF': IFStage(self),
+            'ID': IDStage(self),
+            'EX': EXStage(self),
+            'MEM': MEMStage(self),
+            'WB': WBStage(self)
+        }
+
+    def tick(self):
+
+        self.stages['WB'].execute()
+        self.stages['MEM'].execute()
+        self.stages['EX'].execute()
+        self.stages['ID'].execute()
+        self.stages['IF'].execute()
+
+        self.cycle += 1
+
+    def run(self, max_cycles=100):
+
+        while self.cycle < max_cycles:
+            self.tick()
+
+            if not self.is_done():
+                print(self)
+            else:
+                break
+
+
+        print(f"\nfinal state")
+        print(f"cicluri ceas: {self.cycle-1}")
+        print(f"registri: {self.registers}")
+        print(f"memoria principala: {self.memory}")
+
+    def is_done(self):
+
+        return all(stage.instruction is None for stage in self.stages.values())
+        #adica fiecare stage nu face nimic, am None in fiecare
+
+    def __str__(self):
+        lines = [f"\n{'-' * 50}"]
+        lines.append(f"ciclul {self.cycle}")
+        lines.append(f"{'-' * 50}")
+
+        for name in ['IF', 'ID', 'EX', 'MEM', 'WB']:
+            stage = self.stages[name]
+            instr_str = str(stage.instruction) if stage.instruction else "nimic"
+            lines.append(f"{name:4}: {instr_str}")
+
+            if stage.data:
+                lines.append(f" data: {stage.data}")
+
+        return '\n'.join(lines)
