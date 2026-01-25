@@ -1,2 +1,2 @@
-Registrele: {1: 5, 2: 3}
-x3 este gresit, 0
+Registrele: {1: 5, 2: 3, 3: 8}
+x3 este 8, cum trebuie
