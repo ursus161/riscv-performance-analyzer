@@ -1,3 +1,3 @@
-Registrele: {1: 5, 2: 3, 3: 8}
-9 cicluri de ceas 
-x3 este 8, cum trebuie
+Registrele: {2: 3, 3: 5, 4: 5}
+45 cicluri de ceas 
+x3 este 5, cum trebuie

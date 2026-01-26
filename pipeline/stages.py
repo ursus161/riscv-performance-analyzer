@@ -37,6 +37,49 @@ class IDStage(PipelineStage):
         if self.instruction.rs2 is not None:
             self.data['rs2_value'] = self.pipeline.registers.read(self.instruction.rs2)
 
+        self._apply_forwarding()
+        #id citeste registrele, deci aici implementez forwarding ul
+
+    def _apply_forwarding(self):
+        if self.instruction.rs1 is not None:
+            forwarded_value = self._get_forwarded_value(self.instruction.rs1)
+
+            if forwarded_value is not None:
+
+
+                self.data['rs1_value'] = forwarded_value
+
+
+        if self.instruction.rs2 is not None:
+
+            forwarded_value = self._get_forwarded_value(self.instruction.rs2)
+            if forwarded_value is not None:
+                self.data['rs2_value'] = forwarded_value
+
+    #ex->mem, incerc sa iau valoarea din ex daca e disponibila asap
+    def _get_forwarded_value(self, reg):
+
+
+        ex_instr = self.pipeline.stages['EX'].instruction
+        if ex_instr and ex_instr.rd == reg and not ex_instr.is_store():
+            #a doua conditie mi se pare vaga, vreau registrul rd sa fie cel de care am nevoie
+            #adica efectiv aia e detectarea de hazard
+            #si sa nu fie store pt ca store ul nu scrie in registru
+            ex_data = self.pipeline.stages['EX'].data
+            if 'result' in ex_data:
+                return ex_data['result']
+
+
+        mem_instr = self.pipeline.stages['MEM'].instruction
+        if mem_instr and mem_instr.rd == reg and not mem_instr.is_store():
+            mem_data = self.pipeline.stages['MEM'].data
+            if 'result' in mem_data:
+
+                return mem_data['result']
+
+        # daca nu vreau forward
+        return None
+
 
 class EXStage(PipelineStage):
     def __init__(self, pipeline):
