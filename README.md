@@ -1,51 +1,74 @@
 # RISC-V Pipeline Analyzer
 
-Simulator de procesor RISC-V cu analiza detaliata a pipeline-ului, cache-ului si predictiei branch-urilor.
+Tool for simulating and analyzing RISC-V processor performance with detailed cycle-by-cycle execution tracking, in hopes of discovering performance issues such as poor cache exploitation.
 
-## Ce face
+## What Does It Do?
 
-Simuleaza un procesor RISC-V ciclu cu ciclu si arata exact unde se pierde timpul:
-- Vizualizare pipeline (IF → ID → EX → MEM → WB)
-- Cache hits/misses
-- Predictie branch-uri
-- Statistici de performanta
+Simulates a RISC-V processor cycle-by-cycle to visualize:
+- Pipeline flow (IF → ID → EX → MEM → WB)
+- Hazard detection and resolution mechanisms
+- Performance bottlenecks and optimization opportunities
 
-## Rulare
+**Ultimate goal**: Integration into a workflow for code performance testing in computer architecture contexts.
+
+## Quick Start
 ```bash
 python test_if.py
 ```
+## Features
 
-## Features in progress
+### Implemented features
 
-- **Pipeline 5 stage-uri** cu detectare hazards --> DONE
-- **Cache simulator** (LRU policy)
-- **Branch predictors** (2-bit, maybe some other stuff)
-- **Stats** (CPI, hit rate, accuracy)
+- **5-Stage Pipeline** (IF/ID/EX/MEM/WB)
+  - Data forwarding (EX→ID, MEM→ID, regarding the context)
+  - RAW (Read-After-Write) data hazard detection and resolution
+  - Branch handling (beq, bne)
 
-## Output Exemplu
+- **Core Components**
+  - 32 registers (x0-x31, x0 is **hardwired to zero**)
+  - 4KB RAM (word-aligned)
+  - Cycle-accurate simulation
+    
+- **RISC-V RV32I Subset**
+  - ALU ops: add, addi, sub, and, or, xor
+  - Memory: lw, sw
+  - Control: beq, bne
+
+### Planned features
+- Cache simulator (LRU, hit/miss tracking)
+- Branch predictor (2-bit saturating)
+- Performance metrics (CPI, AMAT, accuracy)
+- Assembly parser (.s files)
+
+**Requirements**: Python 3.10+ (no external dependencies)
+## Example Output
+
+From the EX-Stage first shown in the example, we calculate **x3**, the register is then forwarded to the ID-Stage in the same clock cycle, preventing a RAW hazard.
+
+<img width="377" height="467" alt="{079C93B9-0C59-4C3D-B37C-5C404135502D}" src="https://github.com/user-attachments/assets/f1c0a457-d718-46a5-9957-6a1708c55c28" />
+
+```bash
+[...the rest of the pipeline]
+
+final state
+clock cycles: 33
+registers: {2: 3, 3: 5, 4: 5}
+status: OK 
 ```
-Cycle 10:
-Pipeline: [lw] [add] [addi] [ ] [ ]
-Cache: 0x1004 → MISS (xx% hit rate)
-Branch: TAKEN (xx% accuracy)
 
-Stats:
-- CPI: 1.8
-- Cache hits: xx%
-- Stalls: 15
-```
-
-## Structura
+## Project Structure
 ```
 riscv-cpu-sim/
-├── core/           # Instructiuni, registre, memorie
-├── pipeline/       # Pipeline stages + hazards
-├── cache/          # Cache + LRU
-├── predictors/     # Branch predictors
-└── programs/       # Fisiere .s de test
+├── core/           # Instruction, RegisterFile, Memory
+├── pipeline/       # Pipeline stages + controller
+├── programs/       # Test programs (.py format)
+└── teste/          # Test runner
 ```
 
 ## Tech Stack
 
-Python 3.10+ | RISC-V ISA (subset)
-
+- **Language**: Python 3.10+
+- **Architecture**: RISC-V RV32I subset
+- **Design**: Object-oriented pipeline simulation
+- **Dependencies**: None, **for now**
+ 
