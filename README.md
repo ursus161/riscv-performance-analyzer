@@ -1,6 +1,6 @@
 # RISC-V Pipeline Analyzer
 
-Simulator de procesor RISC-V in Python cu pipeline, cache si branch prediction.
+Simulator de procesor RISC-V cu analiza detaliata a pipeline-ului, cache-ului si predictiei branch-urilor.
 
 ## Ce face
 
@@ -17,21 +17,21 @@ python test_if.py
 
 ## Features in progress
 
-- **Pipeline 5 stage-uri** cu detectare hazards
-- **Cache simulator** (LRU, configurable)
-- **Branch predictors** (2-bit, maybe perceptron)
+- **Pipeline 5 stage-uri** cu detectare hazards --> DONE
+- **Cache simulator** (LRU policy)
+- **Branch predictors** (2-bit, maybe some other stuff)
 - **Stats** (CPI, hit rate, accuracy)
 
 ## Output Exemplu
 ```
 Cycle 10:
 Pipeline: [lw] [add] [addi] [ ] [ ]
-Cache: 0x1004 → MISS (85% hit rate)
-Branch: TAKEN ✓ (92% accuracy)
+Cache: 0x1004 → MISS (xx% hit rate)
+Branch: TAKEN (xx% accuracy)
 
 Stats:
 - CPI: 1.8
-- Cache hits: 85%
+- Cache hits: xx%
 - Stalls: 15
 ```
 

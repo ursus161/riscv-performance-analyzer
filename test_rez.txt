@@ -1,3 +1,3 @@
 Registrele: {2: 3, 3: 5, 4: 5}
-45 cicluri de ceas 
+33 cicluri de ceas 
 x3 este 5, cum trebuie

@@ -1,6 +1,6 @@
 from core.instruction import Instruction
 
-
+# 1 1 2 3 5 8 13 21 34 55
 def get_program():
     return [
         # initializare
@@ -10,7 +10,7 @@ def get_program():
 
         Instruction("add", rd=4, rs1=2, rs2=3),  # x4 = x2 + x3 (next fib)
         Instruction("add", rd=2, rs1=3, rs2=0),
-        Instruction("add", rd=3, rs1=4, rs2=0),  
+        Instruction("add", rd=3, rs1=4, rs2=0),
         Instruction("addi", rd=1, rs1=1, imm=-1),
         Instruction("bne", rs1=1, rs2=0, imm=-4),  # PC=7: if x1!=0 goto PC=3
 

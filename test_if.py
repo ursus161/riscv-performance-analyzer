@@ -1,5 +1,5 @@
 from pipeline.controller import Pipeline
-from programs import sum, fibonacci
+from programs import fibonacci
 
 print("\n"+"="*50)
 print("test 2: fibonacci")
