@@ -1,4 +1,4 @@
-# RISC-V Pipeline Analyzer
+# RISC-V Performance Analyzer
 
 Tool for simulating and analyzing RISC-V processor performance with detailed cycle-by-cycle execution tracking, in hopes of discovering performance issues such as poor cache exploitation.
 
@@ -13,6 +13,7 @@ Simulates a RISC-V processor cycle-by-cycle to visualize:
 
 ## Quick Start
 ```bash
+cd teste
 python test_if.py
 ```
 ## Features
@@ -71,4 +72,4 @@ riscv-cpu-sim/
 - **Architecture**: RISC-V RV32I subset
 - **Design**: Object-oriented pipeline simulation
 - **Dependencies**: None, **for now**
- 
+- **To get a grasp on what's going on**: *Resources, To be added*

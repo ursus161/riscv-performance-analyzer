@@ -1,3 +1,4 @@
+
 from pipeline.controller import Pipeline
 from programs import fibonacci
 
@@ -5,7 +6,8 @@ print("\n"+"="*50)
 print("test 2: fibonacci")
 print("="*50)
 
-instructions= fibonacci.get_program()
+instructions = fibonacci.get_program()
+
 pipeline = Pipeline(instructions)
 pipeline.run()
 
