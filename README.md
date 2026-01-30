@@ -35,8 +35,14 @@ python test_if.py
   - Memory: lw, sw
   - Control: beq, bne
 
+- **Cache simulator**
+  - LRU cache replacement policy
+  - Write-back and write-through policies
+  - Configurable cache size and block size
+  - Cache hit/miss tracking
+  - Data validating mechanism
+  
 ### Planned features
-- Cache simulator (LRU, hit/miss tracking)
 - Branch predictor (2-bit saturating)
 - Performance metrics (CPI, AMAT, accuracy)
 - Assembly parser (.s files)
