@@ -1,4 +1,4 @@
-
+import math
 
 class CacheLine:
 
@@ -28,7 +28,7 @@ class Cache:
 
         self.num_lines = size // line_size
         self.num_sets = self.num_lines // associativity
-
+        self._validate_data()
 
         self.offset_bits = (line_size - 1).bit_length() # daca am 32 biti --> 31 = 11111 in binar --> 5 biti
         self.index_bits = (self.num_sets - 1).bit_length() if self.num_sets > 1 else 0
@@ -157,6 +157,16 @@ class Cache:
             'write_backs': self.write_backs,
             'amat': round(amat, 2)
         }
+
+    def _validate_data(self):
+        if not math.log2(self.size).is_integer():
+           raise ValueError("Cache size-ul mereu trebuie sa fie putere a lui 2")
+        if not math.log2(self.line_size).is_integer():
+           raise ValueError("Line size-ul mereu trebuie sa fie putere a lui 2")
+        if self.size % self.line_size != 0:
+           raise ValueError("Cache size-ul trebuie sa fie multiplu de line size")
+        if (self.size // self.line_size) % self.associativity != 0:
+           raise ValueError("Numarul de linii din cache trebuie sa fie multiplu de asociativitate")
 
     def print_stats(self):
 
