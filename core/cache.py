@@ -203,14 +203,17 @@ class Cache:
         print(f"{'=' * 50}")
 
 if __name__ == "__main__":
+    try:
 
-    cache = Cache(size=64, line_size=16, associativity=2, write_policy='write-back')
+        cache = Cache(size=64, line_size=16, associativity=2, write_policy='write-back')
 
-    addresses = [0x00, 0x10, 0x20, 0x00, 0x10, 0x30, 0x10, 0x10,0x10,0x40,0x20]
+        addresses = [0x00, 0x10, 0x20, 0x00, 0x10, 0x30, 0x10, 0x10,0x10,0x40,0x20]
 
-    for addr in addresses:
-        hit, latency = cache.access(addr, is_write=False)
-        print(f"for the adress: {addr:#04x}: {'Hit' if hit else 'Miss'}, Latency: {latency} cycles")
+        for addr in addresses:
+            hit, latency = cache.access(addr, is_write=False)
+            print(f"for the adress: {addr:#04x}: {'Hit' if hit else 'Miss'}, Latency: {latency} cycles")
 
-    cache.print_stats()
-    cache.print_contents()
+        cache.print_stats()
+        cache.print_contents()
+    except ValueError as ve:
+        print(f"Error initializing cache: {ve}")
