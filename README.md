@@ -39,12 +39,13 @@ python test_if.py
   - LRU cache replacement policy
   - Write-back and write-through policies
   - Configurable cache size and block size
-  - Cache hit/miss tracking
+  - Cache hit/miss tracking, AMAT, hit/miss rates
   - Data validating mechanism
   
 ### Planned features
 - Branch predictor (2-bit saturating)
-- Performance metrics (CPI, AMAT, accuracy)
+- Performance metrics (CPI, branch predictor accuracy, et cetera)
+- Support for additional RISC-V instructions
 - Assembly parser (.s files)
 
 **Requirements**: Python 3.10+ (no external dependencies)
