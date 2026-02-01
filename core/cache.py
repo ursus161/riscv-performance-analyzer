@@ -167,6 +167,12 @@ class Cache:
            raise ValueError("Cache size-ul trebuie sa fie multiplu de line size")
         if (self.size // self.line_size) % self.associativity != 0:
            raise ValueError("Numarul de linii din cache trebuie sa fie multiplu de asociativitate")
+        if self.write_policy not in ['write-through', 'write-back']:
+           raise ValueError("Politica de scriere trebuie sa fie 'write-through' sau 'write-back'")
+        if type(self.size) is not int or type(self.line_size) is not int or type(self.associativity) is not int:
+           raise ValueError("Size, line size si associativity trebuie sa fie intregi")
+        if self.size <= 0 or self.line_size <= 0 or self.associativity <= 0:
+           raise ValueError("Size, line size si associativity trebuie sa fie pozitive")
 
     def print_stats(self):
 

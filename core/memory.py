@@ -4,21 +4,48 @@ class Memory:
     # Word-aligned (adresele sunt multipli de 4)
     # Adresele sunt in bytes, dar stocam words (32-bit)
 
-    def __init__(self, size=1024):
+    def __init__(self, size=2**16, cache=None):
+        # size (int): nr de words / size=1024 → 4KB memorie
 
-            # size (int): nr de words / size=1024 → 4KB memorie
-
-        self.data = [0] * size
+        self.size = size
+        self.data = [0] * (size // 4)
+        self.cache = cache
+        self.ram_accesses = 0
+        self.total_latency = 0
 
     def read(self, address):
 
-        word_index = address >> 2  # address // 4
-        return self.data[word_index]
+        if self.cache: #in cazul in care testez fara cache, nu mi intra aici
+            hit, latency = self.cache.access(address, is_write=False)
+            self.total_latency += latency
+            if not hit:
+                self.ram_accesses += 1
+        else:
+            self.total_latency += 50
+            self.ram_accesses += 1
+
+        word_address = address >> 2
+        return self.data[word_address]
 
     def write(self, address, value):
 
-        word_index = address >> 2
-        self.data[word_index] = value
+        if self.cache:
+            hit, latency = self.cache.access(address, is_write=True)
+            self.total_latency += latency
+            if not hit:
+                self.ram_accesses += 1
+        else:
+            self.total_latency += 50
+            self.ram_accesses += 1
+
+        word_address = address >> 2
+        self.data[word_address] = value
+
+    def get_stats(self):
+        return {
+            'ram_accesses': self.ram_accesses,
+            'total_latency': self.total_latency
+        }
 
     def __str__(self):
 
@@ -30,5 +57,7 @@ class Memory:
 
 if __name__ == "__main__":
     mem = Memory()
-    mem.write(9,4)
+    mem.write(0x100,4)
+    mem.write(0x200,4)
+    assert mem.read(0x200) == 0x100
     print(mem)

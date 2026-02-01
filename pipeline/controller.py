@@ -4,10 +4,10 @@ from pipeline.stages import IFStage, IDStage, EXStage, MEMStage, WBStage
 
 
 class Pipeline:
-    def __init__(self, instructions):
+    def __init__(self, instructions, cache =None):
         self.instructions = instructions
         self.registers = RegisterFile()
-        self.memory = Memory()
+        self.memory = Memory(cache=cache)
         self.pc = 0
         self.cycle = 0
 
@@ -32,7 +32,7 @@ class Pipeline:
 
         self.cycle += 1
 
-    def run(self, max_cycles=100):
+    def run(self, max_cycles=10 ** 3):
         while self.cycle < max_cycles:
             self.tick()
 
@@ -45,6 +45,10 @@ class Pipeline:
         print(f"cicluri ceas: {self.cycle-1}")
         print(f"registri: {self.registers}")
         print(f"memoria principala: {self.memory}")
+
+        if self.memory.cache:
+            print(f"\ncache performance:")
+            self.memory.cache.print_stats()
 
     def is_done(self):
         return all(stage.instruction is None for stage in self.stages.values())
