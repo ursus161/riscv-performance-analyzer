@@ -24,6 +24,7 @@ python test_if.py
   - Data forwarding (EX→ID, MEM→ID, regarding the context)
   - RAW (Read-After-Write) data hazard detection and resolution
   - Branch handling (beq, bne)
+  - CPI/IPC caLculation
 
 - **Core Components**
   - 32 registers (x0-x31, x0 is **hardwired to zero**)
@@ -44,7 +45,7 @@ python test_if.py
   
 ### Planned features
 - Branch predictor (2-bit saturating)
-- Performance metrics (CPI, branch predictor accuracy, et cetera)
+- Performance metrics (branch predictor accuracy, et cetera)
 - Support for additional RISC-V instructions
 - Assembly parser (.s files)
 
