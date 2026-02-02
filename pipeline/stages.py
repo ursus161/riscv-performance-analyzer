@@ -12,7 +12,7 @@ class IFStage(PipelineStage):
     def execute(self):
 
         if self.instruction is not None:
-            return
+            return #daca am deja un stall, nu mai iau alta
 
         if self.pipeline.pc >= len(self.pipeline.instructions):
             self.instruction = None
@@ -47,7 +47,7 @@ class IDStage(PipelineStage):
 
         if self._detect_load_use_hazard():
             # stall
-            self.pipeline.stages['IF'].instruction = self.instruction
+            self.pipeline.stages['IF'].instruction = self.instruction #aici dau feed la stall
             self.instruction = None
             return
 

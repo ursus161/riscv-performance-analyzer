@@ -19,7 +19,7 @@ class CacheLine:
 class Cache:
 
     def __init__(self, size=256, line_size=16, associativity=2,
-                 write_policy='write-through'):
+                 write_policy='write-back'):
         self.size = size
         self.line_size = line_size
         self.associativity = associativity

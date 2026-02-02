@@ -53,6 +53,18 @@ class Pipeline:
     def is_done(self):
         return all(stage.instruction is None for stage in self.stages.values())
 
+
+    def get_performance_stats(self):
+        total_instructions = len([i for i in self.instructions if i])
+        cpi = self.cycle / total_instructions if total_instructions > 0 else 0
+
+        return {
+            'total_cycles': self.cycle,
+            'total_instructions': total_instructions,
+            'cpi': cpi,
+            'ipc': 1 / cpi if cpi > 0 else 0
+        }
+
     def __str__(self):
         lines = [f"\n{'-' * 50}"]
         lines.append(f"ciclul {self.cycle}")
