@@ -21,6 +21,7 @@ def run_prog(cache):
 def main():
     with open("test_rez.txt", "w") as g:
         r = run_prog(None)
+        nocache_cycles = r['memory']['total_latency']  # aproximare
         g.write(f"no cache:\n\n"
                 f"{r['cycles']} cycles\n"
                 f"regs={r['regs']}\n"
@@ -28,11 +29,15 @@ def main():
 
         cache = Cache(size=256, line_size=16, associativity=2)
         r = run_prog(cache)
+        cache_cycles = r['memory']['total_latency']  # aproximare
         g.write(f"cache:\n\n"
                 f"{r['cycles']} cycles\n"
                 f"regs={r['regs']}, hit={r['hit'] * 100:.0f}%\n"
                 f"memory stats: {r['memory']}\n"
-                f"cache stats: {r['cache']}\n")
+                f"cache stats: {r['cache']}\n\n\n")
+
+        g.write(f"folosind memoria cache ne miscam cu {cache_cycles/nocache_cycles * 100}% "
+                f"mai bine\n\n")
 
 
 if __name__ == "__main__":
