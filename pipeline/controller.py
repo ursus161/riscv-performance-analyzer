@@ -30,6 +30,9 @@ class Pipeline:
             if self.stages['EX'].data.get('branch_taken', False):
                 self.pc = self.stages['EX'].data['branch_target'] #daca s a luat branch ul, schimb pc ul
 
+                self.stages['IF'].instruction = None
+                self.stages['ID'].instruction = None #dau flush la instructiunile din IF si ID pentru ca nu mai sunt valide in caz de branch taken
+
         self.cycle += 1
 
     def run(self, max_cycles=10 ** 3):
