@@ -4,12 +4,16 @@ class PipelineStage:
         self.instruction = None
         self.data = {}
 
+    def clear_data(self):
+        self.data = {}
+
 class IFStage(PipelineStage):
     def __init__(self, pipeline):
         super().__init__("IF")
         self.pipeline = pipeline
 
     def execute(self):
+        self.clear_data()
 
         if self.instruction is not None:
             return #daca am deja un stall, nu mai iau alta
@@ -41,7 +45,7 @@ class IDStage(PipelineStage):
     def execute(self):
         self.instruction = self.pipeline.stages['IF'].instruction
 
-
+        self.clear_data()
         if self.instruction is None:
             return
 
@@ -121,6 +125,8 @@ class EXStage(PipelineStage):
         prev_data = self.pipeline.stages['ID'].data
         self.pipeline.stages['ID'].instruction = None
 
+        self.clear_data()
+
         if self.instruction is None:
             return
 
@@ -168,6 +174,8 @@ class MEMStage(PipelineStage):
         prev_data = self.pipeline.stages['EX'].data
         self.pipeline.stages['EX'].instruction = None
 
+        self.clear_data()
+
         if self.instruction is None:
             return
 
@@ -193,6 +201,8 @@ class WBStage(PipelineStage):
         self.instruction = self.pipeline.stages['MEM'].instruction
         prev_data = self.pipeline.stages['MEM'].data
         self.pipeline.stages['MEM'].instruction = None
+
+        self.clear_data()
 
         if self.instruction is None:
             return
