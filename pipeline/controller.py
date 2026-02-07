@@ -10,6 +10,7 @@ class Pipeline:
         self.memory = Memory(cache=cache)
         self.pc = 0
         self.cycle = 0
+        self.executed_count = 0
 
         self.stages = {
             'IF': IFStage(self),
@@ -58,7 +59,7 @@ class Pipeline:
 
 
     def get_performance_stats(self):
-        total_instructions = len([i for i in self.instructions if i])
+        total_instructions = self.executed_count
         cpi = self.cycle / total_instructions if total_instructions > 0 else 0
 
         return {

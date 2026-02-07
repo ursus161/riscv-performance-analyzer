@@ -201,11 +201,13 @@ class WBStage(PipelineStage):
         self.instruction = self.pipeline.stages['MEM'].instruction
         prev_data = self.pipeline.stages['MEM'].data
         self.pipeline.stages['MEM'].instruction = None
-
+        
         self.clear_data()
 
         if self.instruction is None:
             return
+
+        self.pipeline.executed_count += 1
 
         if not self.instruction.is_store() and self.instruction.rd is not None:
             result = prev_data.get('result', 0)
