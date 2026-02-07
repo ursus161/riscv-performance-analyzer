@@ -13,8 +13,36 @@ class Memory:
         self.ram_accesses = 0
         self.total_latency = 0
 
-    def read(self, address):
+        self._validate_config()
 
+    def _validate_config(self):
+
+        if not isinstance(self.size, int):
+            raise TypeError(f"Memory size-ul trebuie sa fie int, nu {type(self.size).__name__}")
+
+        if self.size <= 0:
+            raise ValueError(f"Memory size-ul trebuie sa fie pozitiv, dar este: {self.size}")
+
+        if self.size % 4 != 0:
+            raise ValueError(f"Memory size-ul trebuie sa fie multiplu de 4, dar este: {self.size}")
+
+    def _validate_address(self, address):
+
+        if not isinstance(address, int):
+            raise TypeError(f"Adresa trebuie sa fie int, nu {type(address).__name__}")
+
+        if address < 0:
+            raise ValueError(f"Adresa size-ul trebuie sa fie pozitiv, dar este: {address:#x}")
+
+        if address % 4 != 0:
+            raise ValueError(f"Adresa unaligned: {address:#x} (trebuie 4-byte aligned)")
+
+        if address >= self.size:
+            raise ValueError(f"Adresa out of bounds: {address:#x} (marime memorie: {self.size:#x})")
+
+    def read(self, address):
+        self._validate_address(address)
+            
         if self.cache: #in cazul in care testez fara cache, nu mi intra aici
             hit, latency = self.cache.access(address, is_write=False)
             self.total_latency += latency
