@@ -13,8 +13,7 @@ Simulates a RISC-V processor cycle-by-cycle to visualize:
 
 ## Quick Start
 ```bash
-cd teste
-python test_if.py
+python demo.py
 ```
 ## Features
 
@@ -24,7 +23,7 @@ python test_if.py
   - Data forwarding (EX→ID, MEM→ID, regarding the context)
   - RAW (Read-After-Write) data hazard detection and resolution
   - Branch handling (beq, bne)
-  - CPI/IPC caLculation
+  - CPI/IPC calculation
 
 - **Core Components**
   - 32 registers (x0-x31, x0 is **hardwired to zero**)
@@ -68,7 +67,7 @@ status: OK
 ## Project Structure
 ```
 riscv-cpu-sim/
-├── core/           # Instruction, RegisterFile, Memory
+├── core/           # Instruction, RegisterFile, Memory, Cache
 ├── pipeline/       # Pipeline stages + controller
 ├── programs/       # Test programs (.py format)
 └── teste/          # Test runner
