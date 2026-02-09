@@ -31,7 +31,7 @@ def demo_simple_execution():
         Instruction("add", rd=3, rs1=1, rs2=2),
     ]
 
-    pipeline = Pipeline(instructions)
+    pipeline = Pipeline(instructions, verbose=False)
     pipeline.run()
 
     print_section("Results")
@@ -54,7 +54,7 @@ def demo_cache_impact():
 
     # Without cache
     print_section("WITHOUT Cache")
-    pipeline_no_cache = Pipeline(listadd.get_program())
+    pipeline_no_cache = Pipeline(listadd.get_program(), verbose=False)
     pipeline_no_cache.run()
 
     stats_no_cache = pipeline_no_cache.get_performance_stats()
@@ -68,7 +68,7 @@ def demo_cache_impact():
     # with cache
     print_section("WITH Cache (2-way, 256B, LRU)")
     cache = Cache(size=256, line_size=16, associativity=2, write_policy='write-back')
-    pipeline_cache = Pipeline(listadd.get_program(), cache=cache)
+    pipeline_cache = Pipeline(listadd.get_program(), cache=cache, verbose=False)
     pipeline_cache.run()
 
     stats_cache = pipeline_cache.get_performance_stats()
@@ -110,7 +110,7 @@ def demo_hazard_handling():
         Instruction("add", rd=7, rs1=6, rs2=5),
     ]
 
-    pipeline = Pipeline(instructions)
+    pipeline = Pipeline(instructions, verbose=False)
     pipeline.run()
 
     print_section("Results")
@@ -153,7 +153,7 @@ def demo_configuration_comparison():
             write_policy='write-back'
         )
         instructions = copy.deepcopy(listadd.get_program())
-        pipeline = Pipeline(instructions, cache=cache)
+        pipeline = Pipeline(instructions, cache=cache, verbose=False)
         pipeline.run()
 
         cache_stats = cache.get_stats()

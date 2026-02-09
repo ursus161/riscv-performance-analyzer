@@ -1,16 +1,19 @@
+from cmath import inf
+
 from core.registers import RegisterFile
 from core.memory import Memory
 from pipeline.stages import IFStage, IDStage, EXStage, MEMStage, WBStage
 
 
 class Pipeline:
-    def __init__(self, instructions, cache =None):
+    def __init__(self, instructions, cache =None, verbose = True):
         self.instructions = instructions
         self.registers = RegisterFile()
         self.memory = Memory(cache=cache)
         self.pc = 0
         self.cycle = 0
         self.executed_count = 0
+        self.verbose = verbose
 
         self.stages = {
             'IF': IFStage(self),
@@ -35,13 +38,16 @@ class Pipeline:
                 self.stages['ID'].instruction = None #dau flush la instructiunile din IF si ID pentru ca nu mai sunt valide in caz de branch taken
 
         self.cycle += 1
-
-    def run(self, max_cycles=10 ** 3):
+    #to be modified if you want to prevent infinite loops
+    #set to 'inf' for testing
+    def run(self, max_cycles= inf):
         while self.cycle < max_cycles:
             self.tick()
 
-            if not self.is_done():
+            if not self.is_done() and self.verbose:
                 print(self)
+            elif not self.is_done():
+                continue
             else:
                 break
 
@@ -70,6 +76,7 @@ class Pipeline:
         }
 
     def __str__(self):
+
         lines = [f"\n{'-' * 50}"]
         lines.append(f"ciclul {self.cycle}")
         lines.append(f"{'-' * 50}")
