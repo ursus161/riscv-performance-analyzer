@@ -128,9 +128,13 @@ def demo_configuration_comparison():
     print_header("DEMO 4: Cache Configuration Impact")
 
     configs = [
+        {"size": 64, "associativity": 1, "name": "64B direct-mapped"},
         {"size": 256, "associativity": 1, "name": "256B direct-mapped"},
         {"size": 256, "associativity": 2, "name": "256B 2-way"},
-        {"size": 512, "associativity": 4, "name": "512B 2-way"},
+        {"size": 256, "associativity": 4, "name": "256B 4-way"},
+        {"size": 512, "associativity": 1, "name": "512B direct-mapped"},
+        {"size": 512, "associativity": 2, "name": "512B 2-way"},
+        {"size": 512, "associativity": 4, "name": "512B 4-way"},
         {"size": 1024, "associativity": 4, "name": "1KB 4-way"},
     ]
 

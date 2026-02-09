@@ -5,7 +5,7 @@ def get_program():
     instructions = []
 
     base = 0x100
-    valori = [10*i for i in range(1, 128 + 1)] # 10, 20, ..., 10*1024
+    valori = [10*i for i in range(1, 256 + 1)] # 10, 20, ..., 10*256
 
     instructions.append(Instruction("addi", rd=11, rs1=0, imm=base))
 

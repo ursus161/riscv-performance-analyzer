@@ -1,4 +1,8 @@
-256B direct-mapped          75.0%  hitrate     4992 cycles        1.0x speedup
-256B 2-way                  75.0%  hitrate     4992 cycles        1.0x speedup
-512B 2-way                  88.0%  hitrate     1824 cycles        2.7x speedup
-1KB 4-way                   88.0%  hitrate     1824 cycles        2.7x speedup
+64B direct-mapped           75.0%  hitrate     8762 cycles        1.0x speedup
+256B direct-mapped          75.0%  hitrate     8762 cycles        1.0x speedup
+256B 2-way                  75.0%  hitrate     8762 cycles        1.0x speedup
+256B 4-way                  75.0%  hitrate     8762 cycles        1.0x speedup
+512B direct-mapped          75.0%  hitrate     8762 cycles        1.0x speedup
+512B 2-way                  75.0%  hitrate     8762 cycles        1.0x speedup
+512B 4-way                  75.0%  hitrate     8762 cycles        1.0x speedup
+1KB 4-way                   85.0%  hitrate     3553 cycles        2.5x speedup
