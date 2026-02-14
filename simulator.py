@@ -46,9 +46,9 @@ def main():
     if use_cache:
         print(f"Cache configuration: {cache_size}B, {associativity}-way")
         cache = Cache(size=cache_size, line_size=16, associativity=associativity, write_policy='write-back')
-        pipeline = Pipeline(instructions, cache=cache)
+        pipeline = Pipeline(instructions, cache=cache, verbose=True)
     else:
-        pipeline = Pipeline(instructions)
+        pipeline = Pipeline(instructions, verbose=True)
 
     pipeline.run()
 
