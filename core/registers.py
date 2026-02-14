@@ -2,6 +2,7 @@
 class RegisterFile:
     def __init__(self):
         self.registers = [0] * 32
+        self.registers[2] = 4096 # stack pointer (SP) initializat la capatul memoriei
 
     def read(self, reg):
         return 0 if reg == 0 else self.registers[reg]

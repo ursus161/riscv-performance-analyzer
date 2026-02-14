@@ -31,9 +31,6 @@ class Memory:
         if not isinstance(address, int):
             raise TypeError(f"Adresa trebuie sa fie int, nu {type(address).__name__}")
 
-        if address < 0:
-            raise ValueError(f"Adresa size-ul trebuie sa fie pozitiv, dar este: {address:#x}")
-
         if address % 4 != 0:
             raise ValueError(f"Adresa unaligned: {address:#x} (trebuie 4-byte aligned)")
 

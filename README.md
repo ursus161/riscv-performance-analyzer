@@ -13,7 +13,7 @@ Simulates a RISC-V processor cycle-by-cycle to visualize:
 
 ## Quick Start
 ```bash
-python demo.py
+python simulator.py programs/fibonacci.s --cache --cache-size 1024B --associativity 4
 ```
 ## Features
 
@@ -29,6 +29,7 @@ python demo.py
   - 32 registers (x0-x31, x0 is **hardwired to zero**)
   - 4KB RAM (word-aligned)
   - Cycle-accurate simulation
+  - 4KB stack
     
 - **RISC-V RV32I Subset**
   - ALU ops: add, addi, sub, and, or, xor
@@ -41,7 +42,11 @@ python demo.py
   - Configurable cache size and block size
   - Cache hit/miss tracking, AMAT, hit/miss rates
   - Data validating mechanism
-  
+
+### In progress features
+- Cache visualization (hit/miss patterns)
+- Assembly parser for .s files (currently using Python-based test programs)
+
 ### Planned features
 - Branch predictor (2-bit saturating)
 - Performance metrics (branch predictor accuracy, et cetera)
