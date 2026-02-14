@@ -84,4 +84,4 @@ riscv-cpu-sim/
 - **Architecture**: RISC-V RV32I subset
 - **Design**: Object-oriented pipeline simulation
 - **Dependencies**: None, **for now**
-- **To get a grasp on what's going on**: *Resources, To be added*
+- **To get a grasp on what's going on**: Cristian Rusu's Computer Arhitecutre Lecture
