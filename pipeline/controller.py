@@ -6,7 +6,7 @@ from pipeline.stages import IFStage, IDStage, EXStage, MEMStage, WBStage
 
 
 class Pipeline:
-    def __init__(self, instructions, cache =None, verbose = True):
+    def __init__(self, instructions, cache =None, verbose = False):
         self.instructions = instructions
         self.registers = RegisterFile()
         self.memory = Memory(cache=cache)
