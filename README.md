@@ -13,7 +13,7 @@ Simulates a RISC-V processor cycle-by-cycle to visualize:
 
 ## Quick Start
 ```bash
-python simulator.py programs/fibonacci.s --cache --cache-size 1024B --associativity 4
+python simulator.py programs/fibonacci.s --cache --cache-size 1024 --associativity 4
 ```
 ## Features
 
