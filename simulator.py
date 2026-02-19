@@ -23,6 +23,8 @@ def main():
     filename = sys.argv[1]
     use_cache = '--cache' in sys.argv
 
+    be_verbose = '--verbose' in sys.argv
+
     cache_size = 256
     associativity = 2
 
@@ -46,9 +48,9 @@ def main():
     if use_cache:
         print(f"Cache configuration: {cache_size}B, {associativity}-way")
         cache = Cache(size=cache_size, line_size=16, associativity=associativity, write_policy='write-back')
-        pipeline = Pipeline(instructions, cache=cache, verbose=True)
+        pipeline = Pipeline(instructions, cache=cache, verbose=be_verbose)
     else:
-        pipeline = Pipeline(instructions, verbose=True)
+        pipeline = Pipeline(instructions, verbose=be_verbose)
 
     pipeline.run()
 
