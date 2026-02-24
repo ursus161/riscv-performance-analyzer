@@ -22,7 +22,7 @@ def main():
 
     filename = sys.argv[1]
     use_cache = '--cache' in sys.argv
-
+    tutoriat_mode = '--tutoriat' in sys.argv
     be_verbose = '--verbose' in sys.argv
 
     cache_size = 256
@@ -46,8 +46,10 @@ def main():
     print(f"Loaded {len(instructions)} instructions\n")
 
     if use_cache:
+        write_policy = 'write-back' if '--write-back' in sys.argv else 'write-through'
+
         print(f"Cache configuration: {cache_size}B, {associativity}-way")
-        cache = Cache(size=cache_size, line_size=16, associativity=associativity, write_policy='write-back')
+        cache = Cache(size=cache_size, line_size=16, associativity=associativity, write_policy=write_policy)
         pipeline = Pipeline(instructions, cache=cache, verbose=be_verbose)
     else:
         pipeline = Pipeline(instructions, verbose=be_verbose)
