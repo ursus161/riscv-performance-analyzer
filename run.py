@@ -5,14 +5,14 @@ from core.cache import Cache
 
 
 def print_usage():
-    print("Usage: python simulator.py <file.s> [options]")
+    print("Usage: python run.py <file.s> [options]")
     print("\nOptions:")
     print("  --cache         Enable cache simulation")
     print("  --cache-size N  Cache size in bytes (default: 256)")
     print("  --associativity N  N-way associativity (default: 2)")
     print("\nExample:")
-    print("  python simulator.py programs/test.s")
-    print("  python simulator.py programs/test.s --cache --cache-size 512")
+    print("  python run.py programs/test.s")
+    print("  python run.py programs/test.s --cache --cache-size 512")
 
 
 def main():
@@ -46,7 +46,8 @@ def main():
     print(f"Loaded {len(instructions)} instructions\n")
 
     if use_cache:
-        write_policy = 'write-back' if '--write-back' in sys.argv else 'write-through'
+
+        write_policy = 'write-through' if '--write-through' in sys.argv else 'write-back'
 
         print(f"Cache configuration: {cache_size}B, {associativity}-way")
         cache = Cache(size=cache_size, line_size=16, associativity=associativity, write_policy=write_policy)
