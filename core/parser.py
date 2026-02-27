@@ -157,4 +157,5 @@ class AssemblyParser:
 
 def parse_assembly(filename):
     parser = AssemblyParser(filename)
+
     return parser.parse()

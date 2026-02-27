@@ -14,7 +14,8 @@ class IFStage(PipelineStage):
 
     def execute(self):
         self.clear_data()
-
+        if self.pipeline.mem_is_stalled():
+            return
         if self.instruction is not None:
             return #daca am deja un stall, nu mai iau alta
 
@@ -43,6 +44,9 @@ class IDStage(PipelineStage):
         return False
 
     def execute(self):
+        if self.pipeline.mem_is_stalled():
+            return
+
         self.instruction = self.pipeline.stages['IF'].instruction
 
         self.clear_data()
@@ -121,11 +125,15 @@ class EXStage(PipelineStage):
         self.pipeline = pipeline
 
     def execute(self):
+        if self.pipeline.mem_is_stalled():
+            return
+
         self.instruction = self.pipeline.stages['ID'].instruction
         prev_data = self.pipeline.stages['ID'].data
         self.pipeline.stages['ID'].instruction = None
 
         self.clear_data()
+
 
         if self.instruction is None:
             return
@@ -168,8 +176,13 @@ class MEMStage(PipelineStage):
     def __init__(self, pipeline):
         super().__init__("MEM")
         self.pipeline = pipeline
+        self.stall_cycles = 0
 
     def execute(self):
+        if self.stall_cycles > 0:
+            self.stall_cycles -= 1
+            return
+
         self.instruction = self.pipeline.stages['EX'].instruction
         prev_data = self.pipeline.stages['EX'].data
         self.pipeline.stages['EX'].instruction = None
@@ -181,12 +194,30 @@ class MEMStage(PipelineStage):
 
         if self.instruction.is_load():
             address = prev_data['address']
-            self.data['result'] = self.pipeline.memory.read(address)
+            if self.pipeline.memory.cache:
+                hit, latency = self.pipeline.memory.cache.access(address, is_write=False)
+                self.pipeline.memory.total_latency += latency
+                if not hit:
+                    self.pipeline.memory.ram_accesses += 1
+                    self.stall_cycles = latency - 1
+                word_addr = address >> 2
+                self.data['result'] = self.pipeline.memory.data[word_addr]
+            else:
+                self.data['result'] = self.pipeline.memory.read(address)
 
         elif self.instruction.is_store():
             address = prev_data['address']
             value = prev_data['store_value']
-            self.pipeline.memory.write(address, value)
+            if self.pipeline.memory.cache:
+                hit, latency = self.pipeline.memory.cache.access(address, is_write=True)
+                self.pipeline.memory.total_latency += latency
+                if not hit:
+                    self.pipeline.memory.ram_accesses += 1
+                    self.stall_cycles = latency - 1
+                word_addr = address >> 2
+                self.pipeline.memory.data[word_addr] = value
+            else:
+                self.pipeline.memory.write(address, value)
 
         else:
             self.data['result'] = prev_data.get('result')
@@ -198,6 +229,11 @@ class WBStage(PipelineStage):
         self.pipeline = pipeline
 
     def execute(self):
+        if self.pipeline.mem_is_stalled():
+            self.instruction = None
+            self.clear_data()
+            return
+
         self.instruction = self.pipeline.stages['MEM'].instruction
         prev_data = self.pipeline.stages['MEM'].data
         self.pipeline.stages['MEM'].instruction = None

@@ -90,3 +90,6 @@ class Pipeline:
                 lines.append(f"      data: {stage.data}")
 
         return '\n'.join(lines)
+
+    def mem_is_stalled(self):
+        return self.stages['MEM'].stall_cycles > 0

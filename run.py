@@ -2,6 +2,7 @@ import sys
 from core.parser import parse_assembly
 from pipeline.controller import Pipeline
 from core.cache import Cache
+from cache_compare import compare_caches
 
 
 def print_usage():
@@ -24,9 +25,15 @@ def main():
     use_cache = '--cache' in sys.argv
     tutoriat_mode = '--tutoriat' in sys.argv
     be_verbose = '--verbose' in sys.argv
+    compare = '--compare' in sys.argv or '--compare-cache' in sys.argv or '--compare-caches' in sys.argv
 
     cache_size = 256
     associativity = 2
+
+    if compare:
+
+        compare_caches(filename)
+        return
 
     for i, arg in enumerate(sys.argv):
         if arg == '--cache-size' and i + 1 < len(sys.argv):
