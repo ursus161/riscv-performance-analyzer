@@ -50,15 +50,15 @@ class Pipeline:
                 continue
             else:
                 break
+        if self.verbose:
+            print(f"\nfinal state")
+            print(f"cicluri ceas: {self.cycle-1}")
+            print(f"registri: {self.registers}")
+            print(f"memoria principala: {self.memory}")
 
-        print(f"\nfinal state")
-        print(f"cicluri ceas: {self.cycle-1}")
-        print(f"registri: {self.registers}")
-        print(f"memoria principala: {self.memory}")
-
-        if self.memory.cache:
-            print(f"\ncache performance:")
-            self.memory.cache.print_stats()
+            if self.memory.cache:
+                print(f"\ncache performance:")
+                self.memory.cache.print_stats()
 
     def is_done(self):
         return all(stage.instruction is None for stage in self.stages.values())

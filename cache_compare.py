@@ -15,12 +15,15 @@ def compare_caches(filename):
         return
 
     configs = [
+        {"size": 32, "assoc": 1, "name": "32B 1-way"},
         {"size": 64, "assoc": 1, "name": "64B direct-mapped"},
         {"size": 128, "assoc": 1, "name": "128B direct-mapped"},
         {"size": 128, "assoc": 2, "name": "128B 2-way"},
         {"size": 256, "assoc": 2, "name": "256B 2-way"},
         {"size": 512, "assoc": 2, "name": "512B 2-way"},
         {"size": 512, "assoc": 4, "name": "512B 4-way"},
+        {"size": 1024, "assoc": 2, "name": "1024B 2-way"},
+        {"size": 1024, "assoc": 4, "name": "1024B 4-way"},
     ]
 
     print(f"\n{'=' * 70}")
@@ -87,28 +90,39 @@ def compare_caches(filename):
 
     #  best config
     best_by_hit_rate = max(results, key=lambda x: x['hit_rate'])
-    best_by_speedup = max(results, key=lambda x: float(x['speedup'].rstrip('×')) if x['speedup'] != 'baseline' else 0)
+    best_by_speedup = max(results, key=lambda x: float(x['speedup'].rstrip('x')) if x['speedup'] != 'baseline' else 0)
 
     print(f"Best hit rate:  {best_by_hit_rate['config']['name']} ({best_by_hit_rate['hit_rate'] * 100:.1f}%)")
     if best_by_speedup['speedup'] != 'baseline':
         print(f"Best speedup:   {best_by_speedup['config']['name']} ({best_by_speedup['speedup']})")
 
-
     print(f"\nRECOMMENDATIONS:")
 
-    # sweet spot , cumva cea mai buna alegere s ar afla aici
-    for i, result in enumerate(results):
-        if i > 0:
-            prev = results[i - 1]
-            hit_improvement = (result['hit_rate'] - prev['hit_rate']) * 100
 
-            if hit_improvement < 5:  # devine deja inutil
-                print(f" {prev['config']['name']}: Best cost/performance ratio")
-                print(f" (Beyond this, little improvement for the cost)")
-                break
+    max_improvement_idx = 0
+    max_improvement = 0
+
+    for i in range(1, len(results)):
+        prev_latency = results[i - 1]['latency']
+        curr_latency = results[i]['latency']
+        improvement = prev_latency - curr_latency
+
+
+        if improvement > max_improvement:
+            max_improvement = improvement
+            max_improvement_idx = i
+
+    if max_improvement_idx > 0:
+        recommended = results[max_improvement_idx]
+        speedup = results[0]['latency'] / recommended['latency']
+
+        print(f"  {recommended['config']['name']}: Best cost/performance ratio")
+        print(f"    ({speedup:.2f}x speedup over baseline, {recommended['hit_rate'] * 100:.0f}% hit rate)")
+        print(f"    Beyond this: diminishing returns (< 10% additional speedup)")
+    else:
+        print(f" Smallest cache sufficient for this workload, we can really pick almost anything and it wouldn't matter")
 
     print()
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
