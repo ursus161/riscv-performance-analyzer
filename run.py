@@ -34,6 +34,7 @@ def main():
 
         compare_caches(filename)
         return
+        
 
     for i, arg in enumerate(sys.argv):
         if arg == '--cache-size' and i + 1 < len(sys.argv):
@@ -42,7 +43,7 @@ def main():
             associativity = int(sys.argv[i + 1])
 
     try:
-        instructions = parse_assembly(filename)
+        instructions, initial_memory = parse_assembly(filename)
     except FileNotFoundError:
         print(f"Error: File '{filename}' not found")
         return
@@ -61,6 +62,9 @@ def main():
         pipeline = Pipeline(instructions, cache=cache, verbose=be_verbose)
     else:
         pipeline = Pipeline(instructions, verbose=be_verbose)
+
+    for addr, val in initial_memory.items():
+        pipeline.memory.write(addr, val)
 
     pipeline.run()
 

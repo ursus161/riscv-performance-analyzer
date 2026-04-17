@@ -8,8 +8,7 @@ from core.cache import Cache
 def compare_caches(filename):
 
     try:
-        instructions  = parse_assembly(filename)
-        data_segment = {}
+        instructions, data_segment = parse_assembly(filename)
     except Exception as e:
         print(f"Error: {e}")
         return
