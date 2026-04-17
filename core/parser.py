@@ -3,6 +3,15 @@ from core.instruction import Instruction
 DATA_BASE = 0x400  # baza sectiunii .data (1024, incape in 12-bit signed imm) e practic doar o adresa ram baselien
 
 
+class ParseError(Exception):
+    def __init__(self, message, filename, lineno, line):
+        super().__init__(
+            f"\nParseError: {filename}, linia {lineno}:\n"
+            f"  {line}\n"
+            f"  {message}"
+        )
+
+
 class AssemblyParser:
     def __init__(self, filename):
         self.filename = filename
@@ -12,6 +21,7 @@ class AssemblyParser:
         self.initial_memory = {}
         self._data_ptr = DATA_BASE
         self._section = 'text'
+        self._current_lineno = 0
         self.abi_names = {
             'zero': 0,
             'ra': 1, 'sp': 2, 'gp': 3, 'tp': 4,
@@ -29,6 +39,14 @@ class AssemblyParser:
     def parse(self):
         with open(self.filename, 'r', encoding='utf-8') as f:
             lines = f.readlines()
+
+        cleaned = [self._clean(l).lower() for l in lines]
+        if not any(l.startswith('.data') for l in cleaned):
+            raise ParseError("lipseste directiva .data", self.filename, 0, "")
+        if not any(l.startswith('.text') for l in cleaned):
+            raise ParseError("lipseste directiva .text", self.filename, 0, "")
+        if not any(l.startswith('.globl main') or l.startswith('.global main') for l in cleaned):
+            raise ParseError("lipseste directiva .globl main sau .global main", self.filename, 0, "")
 
         self._first_pass(lines)
         self._second_pass(lines)
@@ -86,8 +104,9 @@ class AssemblyParser:
 
     def _second_pass(self, lines):
         section = 'text'
-        for line in lines:
-            line = self._clean(line)
+        for lineno, raw in enumerate(lines, start=1):
+            self._current_lineno = lineno
+            line = self._clean(raw)
             if not line:
                 continue
 
@@ -108,14 +127,22 @@ class AssemblyParser:
                 if not line:
                     continue
 
-            instr = self._parse_instruction(line)
+            try:
+                instr = self._parse_instruction(line)
+            except ValueError as e:
+                raise ParseError(str(e), self.filename, lineno, raw.strip())
+            except IndexError:
+                raise ParseError("argumente insuficiente", self.filename, lineno, raw.strip())
             if instr:
                 self.instructions.append(instr)
 
     def _resolve_imm(self, token):
         if token in self.data_labels:
             return self.data_labels[token]
-        return int(token, 0)
+        try:
+            return int(token, 0)
+        except ValueError:
+            raise ValueError(f"immediate invalid sau label necunoscut: '{token}'")
 
     def _parse_instruction(self, line):
         parts = line.replace(',', '').split()
@@ -153,8 +180,7 @@ class AssemblyParser:
                 return self._parse_la(parts[1:])
 
             case _:
-                print(f"Warning: Unknown instruction '{opcode}'")
-                return None
+                raise ValueError(f"instructiune necunoscuta: '{opcode}'")
 
     def _parse_r_type(self, opcode, args):
         rd  = self._parse_register(args[0])

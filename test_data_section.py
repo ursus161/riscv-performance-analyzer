@@ -1,9 +1,13 @@
-from core.parser import parse_assembly
+from core.parser import parse_assembly, ParseError
 from pipeline.controller import Pipeline
 
 FILE = 'programs/array_sum.s'
 
-instructions, initial_memory = parse_assembly(FILE)
+try:
+    instructions, initial_memory = parse_assembly(FILE)
+except ParseError as e:
+    print(e)
+    exit(1)
 
 print("=== instructiuni parsate ===")
 for i, instr in enumerate(instructions):
@@ -19,11 +23,10 @@ for addr, val in initial_memory.items():
 
 pipeline.run()
 
-result = pipeline.registers.read(7)  # t2 = x7
-expected = 10 + 20 + 30 + 40 + 50   # 150
+result   = pipeline.registers.read(7)
+expected = 10 + 20 + 30 + 40 + 50
 
 print(f"\n=== rezultat ===")
-print(f"  t2 (x7) = {result}")
-print(f"  asteptat = {expected}")
-print(f"  status: {'OK' if result == expected else 'FAIL'}")
 print(f"  cicluri: {pipeline.cycle}")
+assert result == expected, f"FAIL: t2={result}, asteptat={expected}"
+print(f"  t2 = {result} OK")

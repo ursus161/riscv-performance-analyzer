@@ -1,5 +1,5 @@
 import sys
-from core.parser import parse_assembly
+from core.parser import parse_assembly, ParseError
 from pipeline.controller import Pipeline
 from core.cache import Cache
 from cache_compare import compare_caches
@@ -45,11 +45,14 @@ def main():
     try:
         instructions, initial_memory = parse_assembly(filename)
     except FileNotFoundError:
-        print(f"Error: File '{filename}' not found")
-        return
+        print(f"Error: '{filename}' not found")
+        sys.exit(1)
+    except ParseError as e:
+        print(e)
+        sys.exit(1)
     except Exception as e:
-        print(f"Error parsing file: {e}")
-        return
+        print(f"Error: {e}")
+        sys.exit(1)
 
     print(f"Loaded {len(instructions)} instructions\n")
 
