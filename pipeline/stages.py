@@ -164,12 +164,57 @@ class EXStage(PipelineStage):
                 self.data['address'] = prev_data['rs1_value'] + self.instruction.imm
                 self.data['store_value'] = prev_data['rs2_value']
 
-            case "beq" | "bne":
-                taken = (prev_data['rs1_value'] == prev_data['rs2_value']) if self.instruction.opcode == "beq" else (
-                            prev_data['rs1_value'] != prev_data['rs2_value'])
+            case "sll":
+                self.data['result'] = prev_data['rs1_value'] << (prev_data['rs2_value'] & 0x1F)
+            case "srl":
+                self.data['result'] = (prev_data['rs1_value'] & 0xFFFFFFFF) >> (prev_data['rs2_value'] & 0x1F)
+            case "sra":
+                self.data['result'] = prev_data['rs1_value'] >> (prev_data['rs2_value'] & 0x1F)
+
+            case "andi":
+                self.data['result'] = prev_data['rs1_value'] & self.instruction.imm
+            case "ori":
+                self.data['result'] = prev_data['rs1_value'] | self.instruction.imm
+            case "xori":
+                self.data['result'] = prev_data['rs1_value'] ^ self.instruction.imm
+            case "slti":
+                self.data['result'] = 1 if prev_data['rs1_value'] < self.instruction.imm else 0
+            case "sltiu":
+                self.data['result'] = 1 if (prev_data['rs1_value'] & 0xFFFFFFFF) < (self.instruction.imm & 0xFFFFFFFF) else 0
+            case "slli":
+                self.data['result'] = prev_data['rs1_value'] << (self.instruction.imm & 0x1F)
+            case "srli":
+                self.data['result'] = (prev_data['rs1_value'] & 0xFFFFFFFF) >> (self.instruction.imm & 0x1F)
+            case "srai":
+                self.data['result'] = prev_data['rs1_value'] >> (self.instruction.imm & 0x1F)
+
+            case "lui":
+                self.data['result'] = self.instruction.imm << 12
+            case "auipc":
+                self.data['result'] = self.instruction.pc + (self.instruction.imm << 12)
+
+            case "beq" | "bne" | "blt" | "bge" | "bltu" | "bgeu":
+                a, b = prev_data['rs1_value'], prev_data['rs2_value']
+                match self.instruction.opcode:
+                    case "beq":  taken = a == b
+                    case "bne":  taken = a != b
+                    case "blt":  taken = a < b
+                    case "bge":  taken = a >= b
+                    case "bltu": taken = (a & 0xFFFFFFFF) < (b & 0xFFFFFFFF)
+                    case "bgeu": taken = (a & 0xFFFFFFFF) >= (b & 0xFFFFFFFF)
                 self.data['branch_taken'] = taken
                 if taken:
                     self.data['branch_target'] = self.instruction.pc + self.instruction.imm
+
+            case "jal":
+                self.data['result'] = self.instruction.pc + 1  # return address
+                self.data['branch_taken'] = True
+                self.data['branch_target'] = self.instruction.pc + self.instruction.imm
+
+            case "jalr":
+                self.data['result'] = self.instruction.pc + 1  # return address
+                self.data['branch_taken'] = True
+                self.data['branch_target'] = prev_data['rs1_value'] + self.instruction.imm
 
 
 class MEMStage(PipelineStage):
