@@ -1,4 +1,4 @@
-from cmath import inf
+from math import inf
 
 from core.registers import RegisterFile
 from core.memory import Memory
@@ -52,7 +52,7 @@ class Pipeline:
                 break
         if self.verbose:
             print(f"\nfinal state")
-            print(f"cicluri ceas: {self.cycle-1}")
+            print(f"cicluri ceas: {self.cycle}")
             print(f"registri: {self.registers}")
             print(f"memoria principala: {self.memory}")
 

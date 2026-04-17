@@ -16,7 +16,7 @@ print(f"am: x3={pipeline.registers.read(3)}")
 print(f"status: {'OK' if pipeline.registers.read(3) == 5 else 'FAIL'}")
 with open("teste/test_rez_if.txt", "w") as g:
     g.write(f"{pipeline.registers}\n")
-    g.write(f"{pipeline.cycle-1} cicluri de ceas \n")
+    g.write(f"{pipeline.cycle} cicluri de ceas \n")
     if pipeline.registers.read(3) ==5:
         g.write(f"x3 este 5, cum trebuie")
     else:

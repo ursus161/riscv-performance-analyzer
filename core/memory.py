@@ -53,6 +53,7 @@ class Memory:
         return self.data[word_address]
 
     def write(self, address, value):
+        self._validate_address(address)
 
         if self.cache:
             hit, latency = self.cache.access(address, is_write=True)
@@ -84,5 +85,5 @@ if __name__ == "__main__":
     mem = Memory()
     mem.write(0x100,4)
     mem.write(0x200,4)
-    assert mem.read(0x200) == 0x100
+    assert mem.read(0x200) == 4
     print(mem)

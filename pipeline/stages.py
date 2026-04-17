@@ -195,6 +195,7 @@ class MEMStage(PipelineStage):
         if self.instruction.is_load():
             address = prev_data['address']
             if self.pipeline.memory.cache:
+                self.pipeline.memory._validate_address(address)
                 hit, latency = self.pipeline.memory.cache.access(address, is_write=False)
                 self.pipeline.memory.total_latency += latency
                 if not hit:
@@ -209,6 +210,7 @@ class MEMStage(PipelineStage):
             address = prev_data['address']
             value = prev_data['store_value']
             if self.pipeline.memory.cache:
+                self.pipeline.memory._validate_address(address)
                 hit, latency = self.pipeline.memory.cache.access(address, is_write=True)
                 self.pipeline.memory.total_latency += latency
                 if not hit:

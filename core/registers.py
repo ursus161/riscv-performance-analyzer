@@ -10,9 +10,10 @@ class RegisterFile:
     def write(self, reg, value):
     # aici am testat si branchless (self.regs[reg_num]= value*(reg_num!=0) )
     # insa este cu 8-10% mai lent
-    # plus ca mi ar fi scris si in x0
+    # plus ca mi ar fie scris si in x0
+        if not 0 <= reg <= 31:
+            raise ValueError(f"Registrul x{reg} nu exista (valid: x0-x31)")
         if reg != 0:
-
             self.registers[reg] = value
 
     def __str__(self):
