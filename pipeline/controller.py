@@ -30,7 +30,7 @@ class Pipeline:
         self.stages['ID'].execute()
         self.stages['IF'].execute()
 
-        if (ex_instr := self.stages['EX'].instruction) and ex_instr.is_branch():
+        if (ex_instr := self.stages['EX'].instruction) and (ex_instr.is_branch() or ex_instr.is_jump()):
             if self.stages['EX'].data.get('branch_taken', False):
                 self.pc = self.stages['EX'].data['branch_target'] #daca s a luat branch ul, schimb pc ul
 
