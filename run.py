@@ -23,7 +23,6 @@ def main():
 
     filename = sys.argv[1]
     use_cache = '--cache' in sys.argv
-    tutoriat_mode = '--tutoriat' in sys.argv
     be_verbose = '--verbose' in sys.argv
     compare = '--compare' in sys.argv or '--compare-cache' in sys.argv or '--compare-caches' in sys.argv
 

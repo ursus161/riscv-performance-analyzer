@@ -86,36 +86,23 @@ class IDStage(PipelineStage):
             if forwarded_value is not None:
                 self.data['rs2_value'] = forwarded_value
 
-    #ex->mem, incerc sa iau valoarea din ex daca e disponibila asap
     def _get_forwarded_value(self, reg):
-
+        if reg == 0:
+            return None  # x0 e hardwired zero, nu forwardez niciodata
 
         ex_instr = self.pipeline.stages['EX'].instruction
         if ex_instr and ex_instr.rd == reg and not ex_instr.is_store():
-            #a doua conditie mi se pare vaga, vreau registrul rd sa fie cel de care am nevoie
-            #adica efectiv aia e detectarea de hazard
-            #si sa nu fie store pt ca store ul nu scrie in registru
             ex_data = self.pipeline.stages['EX'].data
             if 'result' in ex_data:
                 return ex_data['result']
-
 
         mem_instr = self.pipeline.stages['MEM'].instruction
         if mem_instr and mem_instr.rd == reg and not mem_instr.is_store():
             mem_data = self.pipeline.stages['MEM'].data
             if 'result' in mem_data:
-
                 return mem_data['result']
 
-        #wb forwarding
-        #problema intampinata in cazul load use hazard, la testarea pentru cache locality
-        wb_instr = self.pipeline.stages['WB'].instruction
-        if wb_instr and wb_instr.rd == reg and not wb_instr.is_store():
-            wb_data = self.pipeline.stages['WB'].data
-            if 'result' in wb_data:
-                return wb_data['result']
-
-        # daca nu vreau forward
+        # WB ruleaza înaintea ID în fiecare ciclu, deci registrele sunt deja actualizate
         return None
 
 

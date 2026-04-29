@@ -5,7 +5,6 @@ class CacheLine:
     def __init__(self):
         self.valid = False
         self.tag = 0
-        self.data = None
         self.dirty = False
         self.lru_counter = 0  # pentru find_victim_lru
 

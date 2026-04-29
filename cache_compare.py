@@ -89,7 +89,7 @@ def compare_caches(filename):
 
     #  best config
     best_by_hit_rate = max(results, key=lambda x: x['hit_rate'])
-    best_by_speedup = max(results, key=lambda x: float(x['speedup'].rstrip('x')) if x['speedup'] != 'baseline' else 0)
+    best_by_speedup = max(results, key=lambda x: float(x['speedup'].rstrip('×x')) if x['speedup'] != 'baseline' else 0)
 
     print(f"Best hit rate:  {best_by_hit_rate['config']['name']} ({best_by_hit_rate['hit_rate'] * 100:.1f}%)")
     if best_by_speedup['speedup'] != 'baseline':
