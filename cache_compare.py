@@ -54,7 +54,7 @@ def compare_caches(filename):
         pipeline = Pipeline(instr_copy, cache=cache, verbose=False)
 
         for address, value in data_segment.items():
-            pipeline.memory.write(address, value)
+            pipeline.memory.data[address >> 2] = value
 
         pipeline.run()
 
