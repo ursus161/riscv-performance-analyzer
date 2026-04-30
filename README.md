@@ -145,7 +145,9 @@ riscv-performance-analyzer/
 - **Design**: Object-oriented pipeline simulation
 - **Dependencies**: None
 
-- **References**: Intro to RISC-V and theoretical materials :https://cs.unibuc.ro/~crusu/asc/Arhitectura%20Sistemelor%20de%20Calcul%20(ASC)%20-%20Laborator%20Partea%200x02.pdf https://cs.unibuc.ro/~crusu/asc/lectures.html ;
-                  A great paper on Branch Predictors, which I've enjoyed: https://www.cs.utexas.edu/~lin/papers/tocs02.pdf ;
-                  For getting your feet wet on cache replacement policies: https://www.geeksforgeeks.org/computer-organization-architecture/cache-replacement-policies/
+- **References**: 
+                 -[Intro to RISC-V](https://cs.unibuc.ro/~crusu/asc/Arhitectura%20Sistemelor%20de%20Calcul%20(ASC)%20-%20Laborator%20Partea%200x02.pdf ) 
+                 - [Computer Architecture know-how](https://cs.unibuc.ro/~crusu/asc/lectures.html )
+                 - [A great paper on Branch Predictors, which I've enjoyed]( https://www.cs.utexas.edu/~lin/papers/tocs02.pdf )
+                 - [For getting your feet wet on cache replacement policies](https://www.geeksforgeeks.org/computer-organization-architecture/cache-replacement-policies/)
                
