@@ -23,9 +23,16 @@ class IFStage(PipelineStage):
             self.instruction = None
             return
 
-        self.instruction = self.pipeline.instructions[self.pipeline.pc]
-        self.instruction.pc = self.pipeline.pc
+        instr = self.pipeline.instructions[self.pipeline.pc]
+        instr.pc = self.pipeline.pc
         self.pipeline.pc += 1
+        self.instruction = instr
+
+        if instr.is_branch() and self.pipeline.branch_predictor:
+            predicted, _ = self.pipeline.branch_predictor.predict(instr.pc)
+            instr.predicted_taken = predicted
+            if predicted:
+                self.pipeline.pc = instr.pc + instr.imm
 
 
 class IDStage(PipelineStage):

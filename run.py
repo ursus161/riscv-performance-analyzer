@@ -24,6 +24,7 @@ def main():
     filename = sys.argv[1]
     use_cache = '--cache' in sys.argv
     be_verbose = '--verbose' in sys.argv
+    use_bp = '--branch-predictor' in sys.argv
     compare = '--compare' in sys.argv or '--compare-cache' in sys.argv or '--compare-caches' in sys.argv
 
     cache_size = 256
@@ -61,9 +62,9 @@ def main():
 
         print(f"Cache configuration: {cache_size}B, {associativity}-way")
         cache = Cache(size=cache_size, line_size=16, associativity=associativity, write_policy=write_policy)
-        pipeline = Pipeline(instructions, cache=cache, verbose=be_verbose)
+        pipeline = Pipeline(instructions, cache=cache, verbose=be_verbose, use_branch_predictor=use_bp)
     else:
-        pipeline = Pipeline(instructions, verbose=be_verbose)
+        pipeline = Pipeline(instructions, verbose=be_verbose, use_branch_predictor=use_bp)
 
     for addr, val in initial_memory.items():
         pipeline.memory.data[addr >> 2] = val
@@ -86,6 +87,13 @@ def main():
         val = pipeline.registers.read(i)
         if val != 0:
             print(f"  x{i} = {val}")
+
+    if use_bp and 'branch_predictor' in stats:
+        bp = stats['branch_predictor']
+        print(f"\nBranch Predictor :")
+        print(f"  Total branches:   {bp['total_branches']}")
+        print(f"  Corecte:          {bp['correct']} ({bp['accuracy'] * 100:.1f}%)")
+        print(f"  Mispredictions:   {bp['mispredictions']}")
 
     if use_cache:
         cache_stats = cache.get_stats()

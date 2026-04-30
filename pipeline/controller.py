@@ -2,11 +2,12 @@ from math import inf
 
 from core.registers import RegisterFile
 from core.memory import Memory
+from core.branch_predictor import PerceptronPredictor
 from pipeline.stages import IFStage, IDStage, EXStage, MEMStage, WBStage
 
 
 class Pipeline:
-    def __init__(self, instructions, cache =None, verbose = False):
+    def __init__(self, instructions, cache=None, verbose=False, use_branch_predictor=False):
         self.instructions = instructions
         self.registers = RegisterFile()
         self.memory = Memory(cache=cache)
@@ -14,6 +15,7 @@ class Pipeline:
         self.cycle = 0
         self.executed_count = 0
         self.verbose = verbose
+        self.branch_predictor = PerceptronPredictor() if use_branch_predictor else None
 
         self.stages = {
             'IF': IFStage(self),
@@ -30,12 +32,24 @@ class Pipeline:
         self.stages['ID'].execute()
         self.stages['IF'].execute()
 
-        if (ex_instr := self.stages['EX'].instruction) and (ex_instr.is_branch() or ex_instr.is_jump()):
-            if self.stages['EX'].data.get('branch_taken', False):
-                self.pc = self.stages['EX'].data['branch_target'] #daca s a luat branch ul, schimb pc ul
+        ex_instr = self.stages['EX'].instruction
+        if ex_instr and (ex_instr.is_branch() or ex_instr.is_jump()):
+            actual_taken = self.stages['EX'].data.get('branch_taken', False)
+            actual_target = self.stages['EX'].data.get('branch_target')
 
-                self.stages['IF'].instruction = None
-                self.stages['ID'].instruction = None #dau flush la instructiunile din IF si ID pentru ca nu mai sunt valide in caz de branch taken
+            if ex_instr.is_branch() and self.branch_predictor:
+                predicted_taken = getattr(ex_instr, 'predicted_taken', False)
+                self.branch_predictor.update(ex_instr.pc, actual_taken)
+
+                if predicted_taken != actual_taken:
+                    self.pc = actual_target if actual_taken else ex_instr.pc + 1
+                    self.stages['IF'].instruction = None
+                    self.stages['ID'].instruction = None
+            else:
+                if actual_taken:
+                    self.pc = actual_target
+                    self.stages['IF'].instruction = None
+                    self.stages['ID'].instruction = None
 
         self.cycle += 1
     #to be modified if you want to prevent infinite loops
@@ -68,12 +82,17 @@ class Pipeline:
         total_instructions = self.executed_count
         cpi = self.cycle / total_instructions if total_instructions > 0 else 0
 
-        return {
+        stats = {
             'total_cycles': self.cycle,
             'total_instructions': total_instructions,
             'cpi': cpi,
-            'ipc': 1 / cpi if cpi > 0 else 0
+            'ipc': 1 / cpi if cpi > 0 else 0,
         }
+
+        if self.branch_predictor:
+            stats['branch_predictor'] = self.branch_predictor.get_stats()
+
+        return stats
 
     def __str__(self):
 
