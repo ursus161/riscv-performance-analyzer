@@ -66,7 +66,7 @@ def main():
         pipeline = Pipeline(instructions, verbose=be_verbose)
 
     for addr, val in initial_memory.items():
-        pipeline.memory.write(addr, val)
+        pipeline.memory.data[addr >> 2] = val
 
     pipeline.run()
 
@@ -82,7 +82,7 @@ def main():
     print(f"  IPC:              {stats['ipc']:.2f}")
 
     print(f"\nRegisters:")
-    for i in range(1, 8):
+    for i in range(1, 32):
         val = pipeline.registers.read(i)
         if val != 0:
             print(f"  x{i} = {val}")
