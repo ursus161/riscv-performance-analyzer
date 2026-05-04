@@ -1,6 +1,10 @@
 import math
 
 
+def _scramble_pc(pc):
+    return pc ^ (pc >> 3) ^ (pc >> 6) ^ (pc >> 9)
+
+
 class BTB:
     def __init__(self, size=64):
         self.size = size
@@ -9,8 +13,7 @@ class BTB:
         self.misses = 0
 
     def _index(self, pc):
-        h = pc ^ (pc >> 3) ^ (pc >> 6) ^ (pc >> 9)
-        return h % self.size
+        return _scramble_pc(pc) % self.size
 
     def lookup(self, pc):
         entry = self.entries[self._index(pc)]
@@ -64,15 +67,12 @@ class PerceptronPredictor:
     def _sigmoid(self, x):
         return 1.0 / (1.0 + math.exp(-x))
 
-    def _hash(self,pc):
-        #vreau sa evit coliziunile in tabelul meu, o coliziune reprezinta ca 2(sau mai multe branchuri) ar avea acc predictie, implicit acuratetea s-ar strica  
-
+    def _hash(self, pc):
         history_val = 0
         for bit in self.history:
             history_val = (history_val << 1) | (1 if bit == 1 else 0)
 
-        index = (pc ^ history_val) % self.table_size
-        return index
+        return (_scramble_pc(pc) ^ history_val) % self.table_size
 
 
     def _output(self, pc):
