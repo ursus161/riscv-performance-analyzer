@@ -32,7 +32,16 @@ class IFStage(PipelineStage):
             predicted, _ = self.pipeline.branch_predictor.predict(instr.pc)
             instr.predicted_taken = predicted
             if predicted:
-                self.pipeline.pc = instr.pc + instr.imm
+                target = self.pipeline.btb.lookup(instr.pc) if self.pipeline.btb else None
+                instr.predicted_target = target
+                if target is not None:
+                    self.pipeline.pc = target
+
+        elif instr.is_jump() and self.pipeline.btb:
+            target = self.pipeline.btb.lookup(instr.pc)
+            instr.predicted_target = target
+            if target is not None:
+                self.pipeline.pc = target
 
 
 class IDStage(PipelineStage):

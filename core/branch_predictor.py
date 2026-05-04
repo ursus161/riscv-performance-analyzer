@@ -1,6 +1,50 @@
 import math
 
 
+class BTB:
+    def __init__(self, size=64):
+        self.size = size
+        self.entries = [None] * size  # fiecare entry: {'tag': pc, 'target': addr}
+        self.hits = 0
+        self.misses = 0
+
+    def _index(self, pc):
+        h = pc ^ (pc >> 3) ^ (pc >> 6) ^ (pc >> 9)
+        return h % self.size
+
+    def lookup(self, pc):
+        entry = self.entries[self._index(pc)]
+        if entry and entry['tag'] == pc:
+            self.hits += 1
+            return entry['target']
+        self.misses += 1
+        return None
+
+    def update(self, pc, target):
+        self.entries[self._index(pc)] = {'tag': pc, 'target': target}
+
+    def get_stats(self):
+        total = self.hits + self.misses
+        hit_rate = self.hits / total if total > 0 else 0
+        return {
+            'total_lookups': total,
+            'hits': self.hits,
+            'misses': self.misses,
+            'hit_rate': round(hit_rate, 4),
+        }
+
+    def print_stats(self):
+        stats = self.get_stats()
+        print(f"\n{'=' * 50}")
+        print(f"Branch Target Buffer (BTB)")
+        print(f"{'=' * 50}")
+        print(f"  Size:          {self.size} entries")
+        print(f"  Total lookups: {stats['total_lookups']}")
+        print(f"  Hits:          {stats['hits']} ({stats['hit_rate'] * 100:.1f}%)")
+        print(f"  Misses:        {stats['misses']}")
+        print(f"{'=' * 50}")
+
+
 class PerceptronPredictor:
     def __init__(self, table_size=64, history_length=8):
         self.table_size = table_size

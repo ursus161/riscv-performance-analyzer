@@ -2,7 +2,7 @@ from math import inf
 
 from core.registers import RegisterFile
 from core.memory import Memory
-from core.branch_predictor import PerceptronPredictor
+from core.branch_predictor import PerceptronPredictor, BTB
 from pipeline.stages import IFStage, IDStage, EXStage, MEMStage, WBStage
 
 
@@ -16,6 +16,7 @@ class Pipeline:
         self.executed_count = 0
         self.verbose = verbose
         self.branch_predictor = PerceptronPredictor() if use_branch_predictor else None
+        self.btb = BTB() if use_branch_predictor else None
 
         self.stages = {
             'IF': IFStage(self),
@@ -37,14 +38,29 @@ class Pipeline:
             actual_taken = self.stages['EX'].data.get('branch_taken', False)
             actual_target = self.stages['EX'].data.get('branch_target')
 
+            if actual_taken and self.btb:
+                self.btb.update(ex_instr.pc, actual_target)
+
             if ex_instr.is_branch() and self.branch_predictor:
                 predicted_taken = getattr(ex_instr, 'predicted_taken', False)
+                predicted_target = getattr(ex_instr, 'predicted_target', None)
                 self.branch_predictor.update(ex_instr.pc, actual_taken)
 
-                if predicted_taken != actual_taken:
+                direction_wrong = predicted_taken != actual_taken
+                target_wrong = actual_taken and predicted_target != actual_target
+
+                if direction_wrong or target_wrong:
                     self.pc = actual_target if actual_taken else ex_instr.pc + 1
                     self.stages['IF'].instruction = None
                     self.stages['ID'].instruction = None
+
+            elif ex_instr.is_jump():
+                predicted_target = getattr(ex_instr, 'predicted_target', None)
+                if predicted_target != actual_target:
+                    self.pc = actual_target
+                    self.stages['IF'].instruction = None
+                    self.stages['ID'].instruction = None
+
             else:
                 if actual_taken:
                     self.pc = actual_target
@@ -91,6 +107,9 @@ class Pipeline:
 
         if self.branch_predictor:
             stats['branch_predictor'] = self.branch_predictor.get_stats()
+
+        if self.btb:
+            stats['btb'] = self.btb.get_stats()
 
         return stats
 
