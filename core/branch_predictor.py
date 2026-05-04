@@ -98,9 +98,9 @@ class PerceptronPredictor:
         # train daca e predictie gresita sau confidence mic in rezultat
         if predicted != actually_taken or abs(y) <= self.threshold:
             w = self.weights[self._hash(pc)]
-            w[0] += t
+            w[0] = max(-127, min(127, w[0] + t))
             for i in range(self.history_length):
-                w[i + 1] += t * self.history[i]
+                w[i + 1] = max(-127, min(127, w[i + 1] + t * self.history[i]))
 
         self.history = [t] + self.history[:-1]
 
