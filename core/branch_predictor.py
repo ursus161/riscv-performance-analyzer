@@ -1,14 +1,12 @@
-import math
-
-
 def _scramble_pc(pc):
+    #helper pentru dispersie pe tabelele din fisierul acesta
     return pc ^ (pc >> 3) ^ (pc >> 6) ^ (pc >> 9)
 
 
 class BTB:
     def __init__(self, size=64):
         self.size = size
-        self.entries = [None] * size  # fiecare entry: {'tag': pc, 'target': addr}
+        self.entries = [None] * size  # fiecare entry: {'tag': pc, 'target': adresa unde prezic ca va sari}
         self.hits = 0
         self.misses = 0
 
@@ -64,9 +62,6 @@ class PerceptronPredictor:
         self.total = 0
         self.correct = 0
 
-    def _sigmoid(self, x):
-        return 1.0 / (1.0 + math.exp(-x))
-
     def _hash(self, pc):
         history_val = 0
         for bit in self.history:
@@ -83,8 +78,7 @@ class PerceptronPredictor:
 
     def predict(self, pc):
         y = self._output(pc)
-        confidence = self._sigmoid(y)   
-        return confidence > 0.5, confidence
+        return y > 0, y
 
     def update(self, pc, actually_taken):
         t = 1 if actually_taken else -1
