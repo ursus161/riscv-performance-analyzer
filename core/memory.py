@@ -26,46 +26,29 @@ class Memory:
         if self.size % 4 != 0:
             raise ValueError(f"Memory size-ul trebuie sa fie multiplu de 4, dar este: {self.size}")
 
-    def _validate_address(self, address):
-
+    def _validate_access(self, address, size):
         if not isinstance(address, int):
             raise TypeError(f"Adresa trebuie sa fie int, nu {type(address).__name__}")
-
-        if address % 4 != 0:
-            raise ValueError(f"Adresa unaligned: {address:#x} (trebuie 4-byte aligned)")
-
-        if address >= self.size:
+        if address % size != 0:
+            raise ValueError(f"Adresa unaligned: {address:#x} (trebuie {size}-byte aligned)")
+        if address < 0 or address >= self.size:
             raise ValueError(f"Adresa out of bounds: {address:#x} (marime memorie: {self.size:#x})")
 
-    def read(self, address):
-        self._validate_address(address)
-            
-        if self.cache: #in cazul in care testez fara cache, nu mi intra aici
-            hit, latency = self.cache.access(address, is_write=False)
-            self.total_latency += latency
-            if not hit:
-                self.ram_accesses += 1
-        else:
-            self.total_latency += 50
-            self.ram_accesses += 1
+    def read(self, address, size=4):
+        self._validate_access(address, size)
+        shift = (address & (4 - size)) * 8
+        mask = (1 << (size * 8)) - 1
+        return (self.data[address >> 2] >> shift) & mask
 
-        word_address = address >> 2
-        return self.data[word_address]
-
-    def write(self, address, value):
-        self._validate_address(address)
-
-        if self.cache:
-            hit, latency = self.cache.access(address, is_write=True)
-            self.total_latency += latency
-            if not hit:
-                self.ram_accesses += 1
-        else:
-            self.total_latency += 50
-            self.ram_accesses += 1
-
-        word_address = address >> 2
-        self.data[word_address] = value
+    def write(self, address, value, size=4):
+        self._validate_access(address, size)
+        if size == 4:
+            self.data[address >> 2] = value
+            return
+        idx = address >> 2
+        shift = (address & (4 - size)) * 8
+        mask = (1 << (size * 8)) - 1
+        self.data[idx] = (self.data[idx] & ~(mask << shift)) | ((value & mask) << shift)
 
     def get_stats(self):
         return {

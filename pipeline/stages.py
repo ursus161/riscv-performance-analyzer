@@ -160,10 +160,10 @@ class EXStage(PipelineStage):
             case "addi":
                 self.data['result'] = prev_data['rs1_value'] + self.instruction.imm
 
-            case "lw":
+            case "lw" | "lb" | "lh" | "lbu" | "lhu":
                 self.data['address'] = prev_data['rs1_value'] + self.instruction.imm
 
-            case "sw":
+            case "sw" | "sb" | "sh":
                 self.data['address'] = prev_data['rs1_value'] + self.instruction.imm
                 self.data['store_value'] = prev_data['rs2_value']
 
@@ -243,31 +243,49 @@ class MEMStage(PipelineStage):
         if self.instruction.is_load():
             address = prev_data['address']
             if self.pipeline.memory.cache:
-                self.pipeline.memory._validate_address(address)
                 hit, latency = self.pipeline.memory.cache.access(address, is_write=False)
                 self.pipeline.memory.total_latency += latency
                 if not hit:
                     self.pipeline.memory.ram_accesses += 1
                     self.stall_cycles = latency - 1
-                word_addr = address >> 2
-                self.data['result'] = self.pipeline.memory.data[word_addr]
             else:
-                self.data['result'] = self.pipeline.memory.read(address)
+                self.pipeline.memory.ram_accesses += 1
+            match self.instruction.opcode:
+                case "lw":
+                    self.data['result'] = self.pipeline.memory.read(address)
+                case "lh":
+                    raw = self.pipeline.memory.read(address, 2)
+                    # xor flippeaza sign bit-ul, scazand 0x8000 translateaza in negativ daca era setat
+                    # ex: 0xFF80 ^ 0x8000 = 0x7F80, 0x7F80 - 0x8000 = -128
+                    # translatie din unsigned in signed
+                    self.data['result'] = (raw ^ 0x8000) - 0x8000
+                case "lhu":
+                    self.data['result'] = self.pipeline.memory.read(address, 2)
+                case "lb":
+                    raw = self.pipeline.memory.read(address, 1)
+                    # acelasi truc, dar pe 8 biti: 0xFF ^ 0x80 = 0x7F, 0x7F - 0x80 = -1
+                    self.data['result'] = (raw ^ 0x80) - 0x80
+                case "lbu":
+                    self.data['result'] = self.pipeline.memory.read(address, 1)
 
         elif self.instruction.is_store():
             address = prev_data['address']
             value = prev_data['store_value']
             if self.pipeline.memory.cache:
-                self.pipeline.memory._validate_address(address)
                 hit, latency = self.pipeline.memory.cache.access(address, is_write=True)
                 self.pipeline.memory.total_latency += latency
                 if not hit:
                     self.pipeline.memory.ram_accesses += 1
                     self.stall_cycles = latency - 1
-                word_addr = address >> 2
-                self.pipeline.memory.data[word_addr] = value
             else:
-                self.pipeline.memory.write(address, value)
+                self.pipeline.memory.ram_accesses += 1
+            match self.instruction.opcode:
+                case "sw":
+                    self.pipeline.memory.write(address, value)
+                case "sh":
+                    self.pipeline.memory.write(address, value, 2)
+                case "sb":
+                    self.pipeline.memory.write(address, value, 1)
 
         else:
             self.data['result'] = prev_data.get('result')

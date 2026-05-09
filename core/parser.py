@@ -158,10 +158,10 @@ class AssemblyParser:
             case 'slli' | 'srli' | 'srai':
                 return self._parse_i_type(opcode, parts[1:])
 
-            case 'lw':
+            case 'lw' | 'lb' | 'lh' | 'lbu' | 'lhu':
                 return self._parse_load(opcode, parts[1:])
 
-            case 'sw':
+            case 'sw' | 'sb' | 'sh':
                 return self._parse_store(opcode, parts[1:])
 
             case 'beq' | 'bne' | 'blt' | 'bge' | 'bltu' | 'bgeu':

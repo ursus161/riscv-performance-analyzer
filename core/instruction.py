@@ -14,10 +14,10 @@ class Instruction:
                 return f"{self.opcode} x{self.rd}, x{self.rs1}, x{self.rs2}"
             case "addi" | "andi" | "ori" | "xori" | "slti" | "sltiu" | "slli" | "srli" | "srai":
                 return f"{self.opcode} x{self.rd}, x{self.rs1}, {self.imm}"
-            case "lw" | "jalr":
+            case "lw" | "lb" | "lh" | "lbu" | "lhu" | "jalr":
                 return f"{self.opcode} x{self.rd}, {self.imm}(x{self.rs1})"
-            case "sw":
-                return f"sw x{self.rs2}, {self.imm}(x{self.rs1})"
+            case "sw" | "sb" | "sh":
+                return f"{self.opcode} x{self.rs2}, {self.imm}(x{self.rs1})"
             case "beq" | "bne" | "blt" | "bge" | "bltu" | "bgeu":
                 return f"{self.opcode} x{self.rs1}, x{self.rs2}, {self.imm}"
             case "lui" | "auipc":
@@ -28,10 +28,10 @@ class Instruction:
                 return f"unknown opcode: {self.opcode}"
 
     def is_load(self):
-        return self.opcode == "lw"
+        return self.opcode in ["lw", "lb", "lh", "lbu", "lhu"]
 
     def is_store(self):
-        return self.opcode == "sw"
+        return self.opcode in ["sw", "sb", "sh"]
 
     def is_branch(self):
         return self.opcode in ["beq", "bne", "blt", "bge", "bltu", "bgeu"]
@@ -58,13 +58,13 @@ class Instruction:
                 if self.rd is None or self.rs1 is None or self.imm is None:
                     raise ValueError(f"{self.opcode} necesita rd, rs1, imm")
 
-            case "lw" | "jalr":
+            case "lw" | "lb" | "lh" | "lbu" | "lhu" | "jalr":
                 if self.rd is None or self.rs1 is None or self.imm is None:
                     raise ValueError(f"{self.opcode} necesita rd, rs1, imm")
 
-            case "sw":
+            case "sw" | "sb" | "sh":
                 if self.rs1 is None or self.rs2 is None or self.imm is None:
-                    raise ValueError(f"sw necesita rs1, rs2, imm")
+                    raise ValueError(f"{self.opcode} necesita rs1, rs2, imm")
 
             case "beq" | "bne" | "blt" | "bge" | "bltu" | "bgeu":
                 if self.rs1 is None or self.rs2 is None or self.imm is None:
