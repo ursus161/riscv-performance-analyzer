@@ -10,7 +10,7 @@ class Instruction:
 
     def __str__(self):
         match self.opcode:
-            case "add" | "sub" | "and" | "or" | "xor" | "sll" | "srl" | "sra":
+            case "add" | "sub" | "and" | "or" | "xor" | "sll" | "srl" | "sra" | "slt" | "sltu":
                 return f"{self.opcode} x{self.rd}, x{self.rs1}, x{self.rs2}"
             case "addi" | "andi" | "ori" | "xori" | "slti" | "sltiu" | "slli" | "srli" | "srai":
                 return f"{self.opcode} x{self.rd}, x{self.rs1}, {self.imm}"
@@ -44,13 +44,13 @@ class Instruction:
             "add", "addi", "sub",
             "and", "andi", "or", "ori", "xor", "xori",
             "sll", "slli", "srl", "srli", "sra", "srai",
-            "slti", "sltiu",
+            "slt", "sltu", "slti", "sltiu",
             "lui", "auipc",
         ]
 
     def _validate(self):
         match self.opcode:
-            case "add" | "sub" | "and" | "or" | "xor" | "sll" | "srl" | "sra":
+            case "add" | "sub" | "and" | "or" | "xor" | "sll" | "srl" | "sra" | "slt" | "sltu":
                 if self.rd is None or self.rs1 is None or self.rs2 is None:
                     raise ValueError(f"{self.opcode} necesita rd, rs1, rs2")
 

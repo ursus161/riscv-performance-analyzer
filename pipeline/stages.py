@@ -167,6 +167,10 @@ class EXStage(PipelineStage):
                 self.data['address'] = prev_data['rs1_value'] + self.instruction.imm
                 self.data['store_value'] = prev_data['rs2_value']
 
+            case "slt":
+                self.data['result'] = 1 if prev_data['rs1_value'] < prev_data['rs2_value'] else 0
+            case "sltu":
+                self.data['result'] = 1 if (prev_data['rs1_value'] & 0xFFFFFFFF) < (prev_data['rs2_value'] & 0xFFFFFFFF) else 0
             case "sll":
                 self.data['result'] = prev_data['rs1_value'] << (prev_data['rs2_value'] & 0x1F)
             case "srl":
@@ -247,9 +251,10 @@ class MEMStage(PipelineStage):
                 self.pipeline.memory.total_latency += latency
                 if not hit:
                     self.pipeline.memory.ram_accesses += 1
-                    self.stall_cycles = latency - 1
+                self.stall_cycles = latency - 1
             else:
                 self.pipeline.memory.ram_accesses += 1
+                self.stall_cycles = self.pipeline.ram_latency - 1
             match self.instruction.opcode:
                 case "lw":
                     self.data['result'] = self.pipeline.memory.read(address)
@@ -276,9 +281,10 @@ class MEMStage(PipelineStage):
                 self.pipeline.memory.total_latency += latency
                 if not hit:
                     self.pipeline.memory.ram_accesses += 1
-                    self.stall_cycles = latency - 1
+                self.stall_cycles = latency - 1
             else:
                 self.pipeline.memory.ram_accesses += 1
+                self.stall_cycles = self.pipeline.ram_latency - 1
             match self.instruction.opcode:
                 case "sw":
                     self.pipeline.memory.write(address, value)

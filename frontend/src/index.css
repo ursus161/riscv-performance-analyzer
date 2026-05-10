@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #08111e;
+  color: #c8d8e8;
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+code, pre, textarea, .mono {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1a3050; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #2a4870; }
+
+/* Syntax highlighting */
+.hl-op      { color: #5ab4f0; }
+.hl-reg     { color: #5dd690; }
+.hl-num     { color: #e8a050; }
+.hl-dir     { color: #a884e0; }
+.hl-label   { color: #e0d060; }
+.hl-comment { color: #405870; font-style: italic; }
+.hl-punct   { color: #304858; }
+
+.editor-wrap {
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+}
+
+.editor-pre,
+.editor-ta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 20px;
+  padding: 12px 16px;
+  margin: 0;
+  white-space: pre;
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+  tab-size: 2;
+  box-sizing: border-box;
+}
+
+.editor-pre {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: transparent;
+  overflow: hidden;
+}
+
+.editor-ta {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: #c8d8e8;
+  resize: none;
+  outline: none;
+  border: none;
+  z-index: 1;
+}
+
+.editor-line { display: block; }
+.editor-line.active  { background: rgba(58,157,232,0.07); border-left: 2px solid #3a9de8; padding-left: 14px; }
+.editor-line.stage-if  { background: rgba(157,123,218,0.08); border-left: 2px solid #9d7bda; padding-left: 14px; }
+.editor-line.stage-id  { background: rgba(58,157,232,0.08); border-left: 2px solid #3a9de8; padding-left: 14px; }
+.editor-line.stage-ex  { background: rgba(232,168,56,0.09); border-left: 2px solid #e8a838; padding-left: 14px; }
+.editor-line.stage-mem { background: rgba(232,120,56,0.09); border-left: 2px solid #e87838; padding-left: 14px; }
+.editor-line.stage-wb  { background: rgba(56,212,153,0.08); border-left: 2px solid #38d499; padding-left: 14px; }
+
+.reg-cell { transition: background-color 0.3s ease, color 0.3s ease; }
+.reg-cell.changed { animation: reg-flash 0.6s ease; }
+
+@keyframes reg-flash {
+  0%   { background-color: rgba(56,212,153,0.28); }
+  100% { background-color: transparent; }
+}
+
+.stage-card { transition: border-color 0.2s ease, opacity 0.2s ease; }

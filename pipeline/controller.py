@@ -7,7 +7,7 @@ from pipeline.stages import IFStage, IDStage, EXStage, MEMStage, WBStage
 
 
 class Pipeline:
-    def __init__(self, instructions, cache=None, verbose=False, use_branch_predictor=False):
+    def __init__(self, instructions, cache=None, verbose=False, use_branch_predictor=False, ram_latency=50):
         self.instructions = instructions
         self.registers = RegisterFile()
         self.memory = Memory(cache=cache)
@@ -15,6 +15,7 @@ class Pipeline:
         self.cycle = 0
         self.executed_count = 0
         self.verbose = verbose
+        self.ram_latency = ram_latency
         self.branch_predictor = PerceptronPredictor() if use_branch_predictor else None
         self.btb = BTB() if use_branch_predictor else None
 

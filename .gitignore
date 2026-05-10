@@ -1,4 +1,24 @@
+# IDE
 .idea
+.vscode
+
+# Python
+__pycache__/
 *.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# Testing (local)
 teste/
 *.txt
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# OS
+.DS_Store
+Thumbs.db
