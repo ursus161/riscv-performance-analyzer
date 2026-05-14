@@ -71,18 +71,18 @@ class PerceptronPredictor:
 
 
     def _output(self, pc):
-
-        w = self.weights[self._hash(pc)] 
-        return w[0] + sum(w[i + 1] * self.history[i] for i in range(self.history_length))
-    #acel w[0] e bias ul meu, fara el un branch always taken ar fi 
+        w = self.weights[self._hash(pc)]
+        #acel w[0] e bias ul meu, fara el un branch always taken ar fi mereu prezis gresit
+        y = w[0] + sum(w[i + 1] * self.history[i] for i in range(self.history_length))
+        return w, y
 
     def predict(self, pc):
-        y = self._output(pc)
+        _, y = self._output(pc)
         return y > 0, y
 
     def update(self, pc, actually_taken):
         t = 1 if actually_taken else -1
-        y = self._output(pc)
+        w, y = self._output(pc)  # hash calculat o singura data, history neschimbat inca
         predicted = y > 0
 
         self.total += 1
@@ -91,7 +91,6 @@ class PerceptronPredictor:
 
         # train daca e predictie gresita sau confidence mic in rezultat
         if predicted != actually_taken or abs(y) <= self.threshold:
-            w = self.weights[self._hash(pc)]
             w[0] = max(-127, min(127, w[0] + t))
             for i in range(self.history_length):
                 w[i + 1] = max(-127, min(127, w[i + 1] + t * self.history[i]))

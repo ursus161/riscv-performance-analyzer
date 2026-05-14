@@ -18,11 +18,12 @@ class CacheLine:
 class Cache:
 
     def __init__(self, size=256, line_size=16, associativity=2,
-                 write_policy='write-back'):
+                 write_policy='write-back', hit_latency=1):
         self.size = size
         self.line_size = line_size
         self.associativity = associativity
         self.write_policy = write_policy
+        self.hit_latency = hit_latency
 
 
         self.num_lines = size // line_size
@@ -77,11 +78,11 @@ class Cache:
                 if is_write:
                     if self.write_policy == 'write-back':
                         line.dirty = True
-                        return (True, 1)  # write doar în cache && rescrierea se intampla la eviction
+                        return (True, self.hit_latency)
                     else:  # write-through
-                        return (True, 1 + 50)   #+ram
+                        return (True, self.hit_latency + 50)
 
-                return (True, 1) #e read
+                return (True, self.hit_latency)
 
 
         self.misses += 1
@@ -142,9 +143,8 @@ class Cache:
         miss_rate = 1 - hit_rate
 
         # AMAT = average memory access time = hit_time + miss_rate x miss_penalty
-        hit_time = 1
-        miss_penalty = 50  # timpul de acces la RAM
-        amat = hit_time + miss_rate * miss_penalty
+        miss_penalty = 50
+        amat = self.hit_latency + miss_rate * miss_penalty
 
         return {
             'hits': self.hits,

@@ -9,7 +9,7 @@ array:
 .globl main
 main:
     addi t1, zero, 32    # N = 32 elemente
-    addi t5, zero, 2     # numar de treceri
+    addi t5, zero, 10    # numar de treceri
     addi t6, zero, 0     # contor treceri
     addi t2, zero, 0     # suma
 

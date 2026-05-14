@@ -149,7 +149,7 @@ class AssemblyParser:
         opcode = parts[0].lower()
 
         match opcode:
-            case 'add' | 'sub' | 'and' | 'or' | 'xor' | 'sll' | 'srl' | 'sra':
+            case 'add' | 'sub' | 'and' | 'or' | 'xor' | 'sll' | 'srl' | 'sra' | 'slt' | 'sltu':
                 return self._parse_r_type(opcode, parts[1:])
 
             case 'addi' | 'andi' | 'ori' | 'xori' | 'slti' | 'sltiu':
