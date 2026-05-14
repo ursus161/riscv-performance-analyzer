@@ -12,6 +12,9 @@ from core.parser import AssemblyParser, ParseError
 from core.cache import Cache
 from pipeline.controller import Pipeline
 
+# hard cap regardless of client input, rate limiting against infinite loops / DoS
+MAX_CYCLES = 100_000
+
 app = FastAPI(title="RISC-V Performance Analyzer")
 
 app.add_middleware(
@@ -104,7 +107,7 @@ def health():
 @app.post("/simulate")
 def simulate(req: SimulateRequest):
     pipeline = _build_pipeline(req)
-    pipeline.run(max_cycles=req.max_cycles if req.max_cycles is not None else inf)
+    pipeline.run(max_cycles=min(req.max_cycles or MAX_CYCLES, MAX_CYCLES))
     return {
         'stats': pipeline.get_performance_stats(),
         'state': _state(pipeline),

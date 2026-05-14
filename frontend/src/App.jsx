@@ -6,7 +6,7 @@ import Memory from './components/Memory'
 import Stats from './components/Stats'
 import Controls from './components/Controls'
 
-const API = 'http://localhost:8000'
+const API = '/api'
 
 const DEFAULT_CODE = `.data
 .text
