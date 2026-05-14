@@ -31,8 +31,8 @@ export default function Registers({ registers, prevRegisters }) {
               style={{ background: changed ? 'rgba(56,212,153,0.10)' : '#08111e' }}
             >
               <div className="flex flex-col leading-none gap-0.5">
-                <span className="text-[9px] mono" style={{ color: '#2a3c50' }}>x{i}</span>
-                <span className="text-[9px] mono" style={{ color: changed ? '#38d499' : '#2a3c50' }}>{ABI[i]}</span>
+                <span className="text-[9px] mono" style={{ color: i === 0 ? '#2a3c50' : '#3a5870' }}>x{i}</span>
+                <span className="text-[9px] mono" style={{ color: changed ? '#38d499' : i === 0 ? '#2a3c50' : '#506880' }}>{ABI[i]}</span>
               </div>
               <span
                 className="text-[11px] mono font-medium tabular-nums"

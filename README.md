@@ -51,7 +51,7 @@ Two containers: `docker-api` (python:3.12-slim) and `docker-frontend` (nginx:alp
 
 Session management: step-mode creates a `Pipeline` instance stored server-side by UUID. Full-run and compare endpoints are stateless.
 
-`/compare` runs 30 pipeline variants (5 sizes × 3 associativities × 2 write policies) against a no-cache baseline and returns all stats in one response.
+`/compare` runs 30 pipeline variants (5 sizes x 3 associativities x 2 write policies) against a no-cache baseline and returns all stats in one response.
 
 Hard cap of 100k cycles server-side regardless of client input, as DoS mitigation.
 

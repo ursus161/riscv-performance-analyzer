@@ -19,7 +19,49 @@ main:
 `
 
 const EDITOR_MIN = 220
-const EDITOR_MAX = 0.65
+const EDITOR_MAX = 0.85
+
+function GitHubStar() {
+  const [stars, setStars] = useState(null)
+  const [hovered, setHovered] = useState(false)
+
+  useEffect(() => {
+    fetch('https://api.github.com/repos/ursus161/riscv-performance-analyzer')
+      .then(r => r.json())
+      .then(d => setStars(d.stargazers_count))
+      .catch(() => {})
+  }, [])
+
+  return (
+    <a
+      href="https://github.com/ursus161/riscv-performance-analyzer"
+      target="_blank"
+      rel="noopener noreferrer"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded font-mono text-xs transition-all duration-150"
+      style={{
+        border: `1px solid ${hovered ? '#e8b84b44' : '#1a3050'}`,
+        background: hovered ? 'rgba(232,184,75,0.07)' : 'transparent',
+        color: hovered ? '#e8b84b' : '#3a5870',
+        textDecoration: 'none',
+      }}
+    >
+      <span style={{ fontSize: 11 }}>{hovered ? '★' : '☆'}</span>
+      <span>star on github</span>
+      {stars !== null && stars > 0 && (
+        <span style={{
+          background: hovered ? 'rgba(232,184,75,0.15)' : '#0f1e30',
+          color: hovered ? '#e8b84b' : '#506880',
+          borderRadius: 3,
+          padding: '0 4px',
+        }}>
+          {stars}
+        </span>
+      )}
+    </a>
+  )
+}
 
 export default function App() {
   const [code, setCode] = useState(() =>
@@ -190,6 +232,7 @@ export default function App() {
         <div className="flex items-center gap-2 shrink-0">
           <span className="font-mono font-semibold text-sm" style={{ color: '#3a9de8' }}>RISC-V</span>
           <span className="font-mono text-xs hidden sm:inline" style={{ color: '#2a3c50' }}>/ performance analyzer</span>
+          <GitHubStar />
         </div>
 
         <div className="ml-auto flex items-center gap-2">
