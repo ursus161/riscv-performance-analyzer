@@ -34,6 +34,7 @@ class SimulateRequest(BaseModel):
     associativity: int = 2
     write_policy: str = "write-back"
     use_branch_predictor: bool = False
+    ram_latency: int = 50
     max_cycles: Optional[int] = None
 
 
@@ -44,6 +45,7 @@ class SessionRequest(BaseModel):
     associativity: int = 2
     write_policy: str = "write-back"
     use_branch_predictor: bool = False
+    ram_latency: int = 50
 
 
 def _parse_code(code: str):
@@ -69,9 +71,11 @@ def _build_pipeline(req) -> Pipeline:
             line_size=16,
             associativity=req.associativity,
             write_policy=req.write_policy,
+            ram_latency=req.ram_latency,
         )
 
-    pipeline = Pipeline(instructions, cache=cache, use_branch_predictor=req.use_branch_predictor)
+    pipeline = Pipeline(instructions, cache=cache, use_branch_predictor=req.use_branch_predictor,
+                        ram_latency=req.ram_latency)
 
     for addr, val in initial_memory.items():
         pipeline.memory.data[addr >> 2] = val
