@@ -5,6 +5,9 @@ from pipeline.controller import Pipeline
 from core.cache import Cache
 
 
+
+
+# OUTDATED FILE FOR CACHE TESTING KEPT FOR DEVELOPMENT PURPOSES 
 def compare_caches(filename):
 
     try:

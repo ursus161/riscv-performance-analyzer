@@ -70,7 +70,7 @@ export default function App() {
   const [editorWidth, setEditorWidth] = useState(() =>
     parseInt(localStorage.getItem('editor-width') ?? '400')
   )
-  const [config, setConfig] = useState({ use_cache: false, use_branch_predictor: false })
+  const [config, setConfig] = useState({ use_cache: true, use_branch_predictor: true })
   const [pipelineState, setPipelineState] = useState(null)
   const [prevState, setPrevState] = useState(null)
   const [stats, setStats] = useState(null)

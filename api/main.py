@@ -30,6 +30,8 @@ sessions: dict[str, dict] = {}
 executor = ThreadPoolExecutor(max_workers=4)
 
 
+#every 5 minutes it looks up sessions that have passed their TTL and must be killed by the janitor
+#i want to prevent a memory leak, without it the sessions dictionary would increase wout end 
 async def _session_janitor():
     while True:
         await asyncio.sleep(300)
@@ -69,11 +71,11 @@ async def log_requests(request: Request, call_next):
 
 class SimConfig(BaseModel):
     code: str
-    use_cache: bool = False
+    use_cache: bool = True
     cache_size: int = 256
     associativity: int = 2
     write_policy: str = "write-back"
-    use_branch_predictor: bool = False
+    use_branch_predictor: bool = True
     ram_latency: int = 50
 
 
