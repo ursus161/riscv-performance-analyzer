@@ -71,6 +71,7 @@ class IDStage(PipelineStage):
 
         if self._detect_load_use_hazard():
             # stall
+            self.pipeline.load_use_stall_cycles += 1
             self.pipeline.stages['IF'].instruction = self.instruction #aici dau feed la stall
             self.instruction = None
             return
@@ -255,6 +256,7 @@ class MEMStage(PipelineStage):
             else:
                 self.pipeline.memory.ram_accesses += 1
                 self.stall_cycles = self.pipeline.ram_latency - 1
+            self.pipeline.mem_stall_cycles += self.stall_cycles
             match self.instruction.opcode:
                 case "lw":
                     self.data['result'] = self.pipeline.memory.read(address)
@@ -285,6 +287,7 @@ class MEMStage(PipelineStage):
             else:
                 self.pipeline.memory.ram_accesses += 1
                 self.stall_cycles = self.pipeline.ram_latency - 1
+            self.pipeline.mem_stall_cycles += self.stall_cycles
             match self.instruction.opcode:
                 case "sw":
                     self.pipeline.memory.write(address, value)

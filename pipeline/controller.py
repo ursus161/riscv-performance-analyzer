@@ -19,6 +19,10 @@ class Pipeline:
         self.branch_predictor = PerceptronPredictor() if use_branch_predictor else None
         self.btb = BTB() if use_branch_predictor else None
 
+        self.load_use_stall_cycles = 0
+        self.branch_flush_cycles = 0
+        self.mem_stall_cycles = 0
+
         self.stages = {
             'IF': IFStage(self),
             'ID': IDStage(self),
@@ -52,6 +56,7 @@ class Pipeline:
 
                 if direction_wrong or target_wrong:
                     self.pc = actual_target if actual_taken else ex_instr.pc + 1
+                    self.branch_flush_cycles += self._count_flush()
                     self.stages['IF'].instruction = None
                     self.stages['ID'].instruction = None
 
@@ -59,12 +64,14 @@ class Pipeline:
                 predicted_target = getattr(ex_instr, 'predicted_target', None)
                 if predicted_target != actual_target:
                     self.pc = actual_target
+                    self.branch_flush_cycles += self._count_flush()
                     self.stages['IF'].instruction = None
                     self.stages['ID'].instruction = None
 
             else:
                 if actual_taken:
                     self.pc = actual_target
+                    self.branch_flush_cycles += self._count_flush()
                     self.stages['IF'].instruction = None
                     self.stages['ID'].instruction = None
 
@@ -112,6 +119,15 @@ class Pipeline:
         if self.btb:
             stats['btb'] = self.btb.get_stats()
 
+        if self.memory.cache:
+            stats['cache'] = self.memory.cache.get_stats()
+
+        stats['stall_breakdown'] = {
+            'load_use': self.load_use_stall_cycles,
+            'branch_flush': self.branch_flush_cycles,
+            'mem': self.mem_stall_cycles,
+        }
+
         return stats
 
     def __str__(self):
@@ -132,3 +148,6 @@ class Pipeline:
 
     def mem_is_stalled(self):
         return self.stages['MEM'].stall_cycles > 0
+
+    def _count_flush(self):
+        return sum(1 for s in ('IF', 'ID') if self.stages[s].instruction is not None)

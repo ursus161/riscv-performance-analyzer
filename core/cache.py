@@ -18,12 +18,13 @@ class CacheLine:
 class Cache:
 
     def __init__(self, size=256, line_size=16, associativity=2,
-                 write_policy='write-back', hit_latency=1):
+                 write_policy='write-back', hit_latency=1, ram_latency=50):
         self.size = size
         self.line_size = line_size
         self.associativity = associativity
         self.write_policy = write_policy
         self.hit_latency = hit_latency
+        self.ram_latency = ram_latency
 
 
         self.num_lines = size // line_size
@@ -80,7 +81,7 @@ class Cache:
                         line.dirty = True
                         return (True, self.hit_latency)
                     else:  # write-through
-                        return (True, self.hit_latency + 50)
+                        return (True, self.hit_latency + self.ram_latency)
 
                 return (True, self.hit_latency)
 
@@ -93,7 +94,7 @@ class Cache:
         write_back_latency = 0
         if victim.valid and victim.dirty:
             self.write_backs += 1
-            write_back_latency = 50
+            write_back_latency = self.ram_latency
 
         if victim.valid:
             self.evictions += 1
@@ -108,11 +109,9 @@ class Cache:
         #pt ca de fiecare data imi rescrie in RAM
         #A SE FOLOSI IN SISTEME SAFETY-CRITICAL ONLY
         if is_write and self.write_policy == 'write-through':
-
-            return (False, 50+ 50 + write_back_latency)
+            return (False, self.ram_latency + self.ram_latency + write_back_latency)
         else:
-
-            return (False, 50 + write_back_latency)
+            return (False, self.ram_latency + write_back_latency)
 
     def _find_lru_victim(self, cache_set):
 
@@ -143,8 +142,7 @@ class Cache:
         miss_rate = 1 - hit_rate
 
         # AMAT = average memory access time = hit_time + miss_rate x miss_penalty
-        miss_penalty = 50
-        amat = self.hit_latency + miss_rate * miss_penalty
+        amat = self.hit_latency + miss_rate * self.ram_latency
 
         return {
             'hits': self.hits,
