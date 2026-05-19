@@ -6,6 +6,7 @@ class Instruction:
         self.rs2 = rs2
         self.imm = imm
         self.pc = None
+        self.source_line = None  # 0-indexed editor line, set by parser
         self._validate()
 
     def __str__(self):

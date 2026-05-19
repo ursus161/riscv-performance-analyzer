@@ -12,6 +12,22 @@ class ParseError(Exception):
         )
 
 
+# la nivel de modul ca sa poata fi importat si inversat de altii (ex. controller pentru reg_name)
+ABI_NAMES = {
+    'zero': 0,
+    'ra': 1, 'sp': 2, 'gp': 3, 'tp': 4,
+    't0': 5, 't1': 6, 't2': 7,
+    's0': 8, 'fp': 8,
+    's1': 9,
+    'a0': 10, 'a1': 11, 'a2': 12, 'a3': 13,
+    'a4': 14, 'a5': 15, 'a6': 16, 'a7': 17,
+    's2': 18, 's3': 19, 's4': 20, 's5': 21,
+    's6': 22, 's7': 23, 's8': 24, 's9': 25,
+    's10': 26, 's11': 27,
+    't3': 28, 't4': 29, 't5': 30, 't6': 31,
+}
+
+
 class AssemblyParser:
     def __init__(self, filename):
         self.filename = filename
@@ -22,19 +38,7 @@ class AssemblyParser:
         self._data_ptr = DATA_BASE
         self._section = 'text'
         self._current_lineno = 0
-        self.abi_names = {
-            'zero': 0,
-            'ra': 1, 'sp': 2, 'gp': 3, 'tp': 4,
-            't0': 5, 't1': 6, 't2': 7,
-            's0': 8, 'fp': 8,
-            's1': 9,
-            'a0': 10, 'a1': 11, 'a2': 12, 'a3': 13,
-            'a4': 14, 'a5': 15, 'a6': 16, 'a7': 17,
-            's2': 18, 's3': 19, 's4': 20, 's5': 21,
-            's6': 22, 's7': 23, 's8': 24, 's9': 25,
-            's10': 26, 's11': 27,
-            't3': 28, 't4': 29, 't5': 30, 't6': 31
-        }
+        self.abi_names = ABI_NAMES
 
     def parse(self):
         with open(self.filename, 'r', encoding='utf-8') as f:
@@ -134,6 +138,7 @@ class AssemblyParser:
             except IndexError:
                 raise ParseError("argumente insuficiente", self.filename, lineno, raw.strip())
             if instr:
+                instr.source_line = lineno - 1
                 self.instructions.append(instr)
 
     def _resolve_imm(self, token):

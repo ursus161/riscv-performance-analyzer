@@ -5,6 +5,8 @@ import Registers from './components/Registers'
 import Memory from './components/Memory'
 import Stats from './components/Stats'
 import Controls from './components/Controls'
+import HazardGraph from './components/HazardGraph'
+import Timeline from './components/Timeline'
 
 const API = '/api'
 
@@ -212,6 +214,15 @@ export default function App() {
         .map(([name, s]) => ({ stage: name, instr: s.instruction }))
     : []
 
+  // stall-uri per linie de editor, derivate din stats dupa run
+  const stallData = stats?.per_instruction_stalls
+    ? Object.values(stats.per_instruction_stalls).reduce((acc, s) => {
+        if (s.source_line != null && s.total > 0)
+          acc[s.source_line] = (acc[s.source_line] ?? 0) + s.total
+        return acc
+      }, {})
+    : null
+
   // Status bar text
   const statusMode = loading ? 'running…'
     : isDone ? 'done'
@@ -262,7 +273,7 @@ export default function App() {
           <div className="px-3 py-1.5 border-b shrink-0 flex items-center gap-2" style={{ borderColor: '#1a3050', background: '#0c1829' }}>
             <span className="text-[11px] font-mono" style={{ color: '#506880' }}>editor</span>
           </div>
-          <Editor code={code} onChange={setCode} activeStages={activeStages} />
+          <Editor code={code} onChange={setCode} activeStages={activeStages} stallData={stallData} />
 
           {error && (
             <div className="shrink-0 border-t p-2.5" style={{ borderColor: 'rgba(232,80,64,0.3)', background: 'rgba(232,80,64,0.07)' }}>
@@ -292,6 +303,8 @@ export default function App() {
           {(stats || pipelineState) && (
             <Stats stats={stats} state={pipelineState} config={config} compareStats={compareStats} />
           )}
+          <HazardGraph hazards={stats?.hazards} />
+          <Timeline stats={stats} />
         </div>
       </div>
 

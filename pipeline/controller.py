@@ -3,7 +3,45 @@ from math import inf
 from core.registers import RegisterFile
 from core.memory import Memory
 from core.branch_predictor import PerceptronPredictor, BTB
+from core.parser import ABI_NAMES
 from pipeline.stages import IFStage, IDStage, EXStage, MEMStage, WBStage
+
+# inversam ABI_NAMES (name->num) ca sa putem afisa numele registrului din numarul lui
+# fp si s0 ambele -> 8, vrem s0 ca nume primar deci filtram fp
+_REG_NAMES = {v: k for k, v in ABI_NAMES.items() if k != 'fp'}
+
+
+def _analyze_hazards(instructions):
+    # analiza statica RAW — singura dependenta care conteaza in pipeline-ul nostru
+    # causes_stall=True doar pentru load-use la distanta 1, singurul caz pe care forwarding-ul nu-l poate acoperi
+    hazards = []
+    for j, instr_j in enumerate(instructions):
+        reads_j = {r for r in (instr_j.rs1, instr_j.rs2) if r is not None and r != 0}
+        if not reads_j:
+            continue
+        for i in range(j):
+            instr_i = instructions[i]
+            if instr_i.rd is None or instr_i.rd == 0 or instr_i.rd not in reads_j:
+                continue
+            # daca cineva rescrie registrul intre i si j, dependenta e rezolvata
+            resolved = any(instructions[k].rd == instr_i.rd for k in range(i + 1, j))
+            if resolved:
+                continue
+            reg = instr_i.rd
+            hazards.append({
+                'from_pc': i,
+                'to_pc': j,
+                'type': 'RAW',
+                'reg': reg,
+                'reg_name': f'x{reg}/{_REG_NAMES.get(reg, "")}',
+                'distance': j - i,
+                'causes_stall': instr_i.is_load() and (j - i) == 1,
+                'from_line': instr_i.source_line,
+                'to_line': instr_j.source_line,
+                'from_instr': str(instr_i),
+                'to_instr': str(instr_j),
+            })
+    return hazards
 
 
 class Pipeline:
@@ -23,6 +61,11 @@ class Pipeline:
         self.branch_flush_cycles = 0
         self.mem_stall_cycles = 0
 
+        # stall-uri atribuite per instructiune (pc -> {load_use, branch_flush, mem_stall})
+        self.stalls_per_pc: dict[int, dict] = {}
+        # ciclul de intrare in fiecare etapa, pentru diagrama Gantt
+        self.timeline: dict[int, dict] = {}
+
         self.stages = {
             'IF': IFStage(self),
             'ID': IDStage(self),
@@ -30,6 +73,10 @@ class Pipeline:
             'MEM': MEMStage(self),
             'WB': WBStage(self)
         }
+
+    def _add_stall(self, pc, kind, count=1):
+        entry = self.stalls_per_pc.setdefault(pc, {'load_use': 0, 'branch_flush': 0, 'mem_stall': 0})
+        entry[kind] += count
 
     def tick(self):
         self.stages['WB'].execute()
@@ -56,7 +103,9 @@ class Pipeline:
 
                 if direction_wrong or target_wrong:
                     self.pc = actual_target if actual_taken else ex_instr.pc + 1
-                    self.branch_flush_cycles += self._count_flush()
+                    flush = self._count_flush()
+                    self.branch_flush_cycles += flush
+                    self._add_stall(ex_instr.pc, 'branch_flush', flush)
                     self.stages['IF'].instruction = None
                     self.stages['ID'].instruction = None
 
@@ -64,21 +113,26 @@ class Pipeline:
                 predicted_target = getattr(ex_instr, 'predicted_target', None)
                 if predicted_target != actual_target:
                     self.pc = actual_target
-                    self.branch_flush_cycles += self._count_flush()
+                    flush = self._count_flush()
+                    self.branch_flush_cycles += flush
+                    self._add_stall(ex_instr.pc, 'branch_flush', flush)
                     self.stages['IF'].instruction = None
                     self.stages['ID'].instruction = None
 
             else:
                 if actual_taken:
                     self.pc = actual_target
-                    self.branch_flush_cycles += self._count_flush()
+                    flush = self._count_flush()
+                    self.branch_flush_cycles += flush
+                    self._add_stall(ex_instr.pc, 'branch_flush', flush)
                     self.stages['IF'].instruction = None
                     self.stages['ID'].instruction = None
 
         self.cycle += 1
+
     #to be modified if you want to prevent infinite loops
     #set to 'inf' for testing
-    def run(self, max_cycles= inf):
+    def run(self, max_cycles=inf):
         while self.cycle < max_cycles:
             self.tick()
 
@@ -100,7 +154,6 @@ class Pipeline:
 
     def is_done(self):
         return all(stage.instruction is None for stage in self.stages.values())
-
 
     def get_performance_stats(self):
         total_instructions = self.executed_count
@@ -128,10 +181,18 @@ class Pipeline:
             'mem': self.mem_stall_cycles,
         }
 
+        stats['per_instruction_stalls'] = {
+            pc: {**s, 'total': sum(s.values()), 'source_line': self.instructions[pc].source_line}
+            for pc, s in self.stalls_per_pc.items()
+            if 0 <= pc < len(self.instructions)
+        }
+
+        stats['timeline'] = dict(sorted(self.timeline.items()))
+        stats['hazards'] = _analyze_hazards(self.instructions)
+
         return stats
 
     def __str__(self):
-
         lines = [f"\n{'-' * 50}"]
         lines.append(f"ciclul {self.cycle}")
         lines.append(f"{'-' * 50}")
