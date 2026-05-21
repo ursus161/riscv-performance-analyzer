@@ -77,7 +77,7 @@ class SimConfig(BaseModel):
     write_policy: str = "write-back"
     use_branch_predictor: bool = True
     ram_latency: int = 50
-    prefetch_enabled: bool = False
+    prefetch_enabled: bool = True
 
 
 class SimulateRequest(SimConfig):

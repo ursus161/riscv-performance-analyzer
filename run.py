@@ -2,8 +2,6 @@ import sys
 from core.parser import parse_assembly, ParseError
 from pipeline.controller import Pipeline
 from core.cache import Cache
-from cache_compare import compare_caches
-
 
 def print_usage():
     print("Usage: python run.py <file.s> [options]")
@@ -25,17 +23,9 @@ def main():
     use_cache = '--cache' in sys.argv
     be_verbose = '--verbose' in sys.argv
     use_bp = '--branch-predictor' in sys.argv
-    use_prefetch = '--prefetch' in sys.argv
-    compare = '--compare' in sys.argv or '--compare-cache' in sys.argv or '--compare-caches' in sys.argv
-
+    use_prefetch = '--no-prefetch' not in sys.argv
     cache_size = 256
     associativity = 2
-
-    if compare:
-
-        compare_caches(filename)
-        return
-        
 
     for i, arg in enumerate(sys.argv):
         if arg == '--cache-size' and i + 1 < len(sys.argv):
@@ -106,6 +96,7 @@ def main():
         print(f"  Hits:             {cache_stats['hits']}")
         print(f"  Misses:           {cache_stats['misses']}")
         print(f"  AMAT:             {cache_stats['amat']:.2f} cycles")
+        print(f"  Prefetch:         {'on' if use_prefetch else 'off'}")
         if use_prefetch:
             print(f"  Prefetch inserts: {cache_stats['prefetch_inserts']}")
             print(f"  Prefetch hits:    {cache_stats['prefetch_hits']}")
