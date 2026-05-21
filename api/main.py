@@ -77,6 +77,7 @@ class SimConfig(BaseModel):
     write_policy: str = "write-back"
     use_branch_predictor: bool = True
     ram_latency: int = 50
+    prefetch_enabled: bool = False
 
 
 class SimulateRequest(SimConfig):
@@ -106,6 +107,7 @@ def _build_pipeline(req: SimConfig) -> Pipeline:
             associativity=req.associativity,
             write_policy=req.write_policy,
             ram_latency=req.ram_latency,
+            prefetch_enabled=req.prefetch_enabled,
         )
     pipeline = Pipeline(
         instructions,

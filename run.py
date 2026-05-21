@@ -25,6 +25,7 @@ def main():
     use_cache = '--cache' in sys.argv
     be_verbose = '--verbose' in sys.argv
     use_bp = '--branch-predictor' in sys.argv
+    use_prefetch = '--prefetch' in sys.argv
     compare = '--compare' in sys.argv or '--compare-cache' in sys.argv or '--compare-caches' in sys.argv
 
     cache_size = 256
@@ -61,7 +62,8 @@ def main():
         write_policy = 'write-through' if '--write-through' in sys.argv else 'write-back'
 
         print(f"Cache configuration: {cache_size}B, {associativity}-way")
-        cache = Cache(size=cache_size, line_size=16, associativity=associativity, write_policy=write_policy)
+        cache = Cache(size=cache_size, line_size=16, associativity=associativity, write_policy=write_policy,
+                      prefetch_enabled=use_prefetch)
         pipeline = Pipeline(instructions, cache=cache, verbose=be_verbose, use_branch_predictor=use_bp)
     else:
         pipeline = Pipeline(instructions, verbose=be_verbose, use_branch_predictor=use_bp)
@@ -104,6 +106,11 @@ def main():
         print(f"  Hits:             {cache_stats['hits']}")
         print(f"  Misses:           {cache_stats['misses']}")
         print(f"  AMAT:             {cache_stats['amat']:.2f} cycles")
+        if use_prefetch:
+            print(f"  Prefetch inserts: {cache_stats['prefetch_inserts']}")
+            print(f"  Prefetch hits:    {cache_stats['prefetch_hits']}")
+            print(f"  Prefetch coverage:{cache_stats['prefetch_coverage'] * 100:.1f}%")
+
         print(f"\nMemory:")
         print(f"  Total latency:    {mem_stats['total_latency']} cycles")
         print(f"  RAM accesses:     {mem_stats['ram_accesses']}")
