@@ -130,4 +130,4 @@ stride_loop:
 done:
     # s0 = suma finala
     # daca programul e corect, trebuie sa fie o valoare consistenta
-    # pt debugging: (1+2+...+64)*8 iteratii thrash + (65+...+128)*8 + interleaved + stride
+    # pt debugging: (1+2+...+64)*8 iteratii thrash + (65+...+128)*8 + interleaved + stride 

@@ -25,6 +25,9 @@ code, pre, textarea, .mono {
 ::-webkit-scrollbar-thumb { background: #1a3050; border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: #2a4870; }
 
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 /* Syntax highlighting */
 .hl-op      { color: #5ab4f0; }
 .hl-reg     { color: #5dd690; }
@@ -36,8 +39,9 @@ code, pre, textarea, .mono {
 
 .editor-wrap {
   position: relative;
-  overflow: hidden;
   flex: 1;
+  align-self: flex-start;
+  min-width: 0;
 }
 
 .editor-pre,
@@ -48,24 +52,21 @@ code, pre, textarea, .mono {
   padding: 12px 16px;
   margin: 0;
   white-space: pre;
-  overflow: auto;
   width: 100%;
-  height: 100%;
   tab-size: 2;
   box-sizing: border-box;
 }
 
 .editor-pre {
-  position: absolute;
-  inset: 0;
+  display: block;
   pointer-events: none;
   background: transparent;
-  overflow: hidden;
 }
 
 .editor-ta {
   position: absolute;
   inset: 0;
+  height: 100%;
   background: transparent;
   color: transparent;
   caret-color: #c8d8e8;
@@ -73,6 +74,7 @@ code, pre, textarea, .mono {
   outline: none;
   border: none;
   z-index: 1;
+  overflow: hidden;
 }
 
 .editor-line { display: block; }

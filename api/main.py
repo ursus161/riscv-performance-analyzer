@@ -139,6 +139,32 @@ def _state(pipeline: Pipeline) -> dict:
     }
 
 
+EXAMPLES_DIR = os.path.join(os.path.dirname(__file__), "..", "programs")
+
+EXAMPLE_LABELS = {
+    "demo.s": "basic loop",
+    "pipeline_demo.s": "pipeline hazards",
+    "array_sum.s": "array sum",
+    "bp_demo.s": "branch predictor",
+    "bp_demo2.s": "branch predictor (advanced)",
+    "cache_stress.s": "cache: temporal locality",
+    "cache_stress1.s": "cache: thrashing",
+}
+
+
+@app.get("/examples")
+def get_examples():
+    result = []
+    for filename, label in EXAMPLE_LABELS.items():
+        path = os.path.join(EXAMPLES_DIR, filename)
+        try:
+            with open(path) as f:
+                result.append({"name": filename, "label": label, "code": f.read()})
+        except FileNotFoundError:
+            pass
+    return result
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}

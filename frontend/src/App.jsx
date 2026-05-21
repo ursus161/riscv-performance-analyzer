@@ -80,11 +80,19 @@ export default function App() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const [mode, setMode] = useState(null)
+  const [examples, setExamples] = useState([])
   const sessionId = useRef(null)
   const isDragging = useRef(false)
   const widthRef = useRef(editorWidth)
 
   useEffect(() => { localStorage.setItem('riscv-code', code) }, [code])
+
+  useEffect(() => {
+    fetch(`${API}/examples`)
+      .then(r => r.json())
+      .then(setExamples)
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const onMove = (e) => {
@@ -214,7 +222,6 @@ export default function App() {
         .map(([name, s]) => ({ stage: name, instr: s.instruction }))
     : []
 
-  // stall-uri per linie de editor, derivate din stats dupa run
   const stallData = stats?.per_instruction_stalls
     ? Object.values(stats.per_instruction_stalls).reduce((acc, s) => {
         if (s.source_line != null && s.total > 0)
@@ -223,7 +230,6 @@ export default function App() {
       }, {})
     : null
 
-  // Status bar text
   const statusMode = loading ? 'running…'
     : isDone ? 'done'
     : inStep ? `step · cycle ${pipelineState?.cycle ?? 0}`
@@ -272,6 +278,19 @@ export default function App() {
         >
           <div className="px-3 py-1.5 border-b shrink-0 flex items-center gap-2" style={{ borderColor: '#1a3050', background: '#0c1829' }}>
             <span className="text-[11px] font-mono" style={{ color: '#506880' }}>editor</span>
+            {examples.length > 0 && (
+              <select
+                defaultValue=""
+                onChange={e => { if (e.target.value) { setCode(examples.find(x => x.name === e.target.value)?.code ?? ''); e.target.value = '' } }}
+                className="ml-auto text-[11px] font-mono rounded-sm px-1.5 py-0.5 border outline-none cursor-pointer"
+                style={{ background: '#08111e', color: '#506880', borderColor: '#1a3050' }}
+              >
+                <option value="" disabled>examples</option>
+                {examples.map(ex => (
+                  <option key={ex.name} value={ex.name}>{ex.label}</option>
+                ))}
+              </select>
+            )}
           </div>
           <Editor code={code} onChange={setCode} activeStages={activeStages} stallData={stallData} />
 
