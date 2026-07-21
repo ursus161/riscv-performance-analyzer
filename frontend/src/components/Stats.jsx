@@ -57,9 +57,9 @@ function CompareTable({ compareStats }) {
 
   const optimalV = optimalIdx >= 0 ? variants[optimalIdx] : null
   const banner = allSame
-    ? 'cache nu aduce beneficiu — nicio instrucțiune de memorie semnificativă'
+    ? 'cache brings no benefit — no significant memory instructions'
     : optimalV
-      ? `optim: ${optimalV.size}B / ${optimalV.associativity}-way / ${optimalV.write_policy === 'write-back' ? 'WB' : 'WT'} — cel mai mic cache care atinge performanța maximă`
+      ? `optimal: ${optimalV.size}B / ${optimalV.associativity}-way / ${optimalV.write_policy === 'write-back' ? 'WB' : 'WT'} — smallest cache that reaches peak performance`
       : null
 
   const th = 'text-right px-2.5 py-1.5 text-[10px] font-mono font-medium whitespace-nowrap'
@@ -126,7 +126,7 @@ function CompareTable({ compareStats }) {
                     {isOptimal && (
                       <span className="text-[9px] font-mono px-1 py-0.5 rounded-sm"
                         style={{ background: 'rgba(58,157,232,0.15)', color: '#3a9de8', border: '1px solid rgba(58,157,232,0.3)' }}>
-                        optim
+                        optimal
                       </span>
                     )}
                   </td>

@@ -1,5 +1,5 @@
-// dependente RAW intre instructiuni
-// causes_stall=true inseamna load-use la distanta 1 — singurul caz pe care forwarding-ul nu-l poate acoperi
+// RAW dependencies between instructions
+// causes_stall=true means load-use at distance 1 — the only case forwarding can't cover
 
 const TYPE_COLOR = {
   stall:   { bg: 'rgba(232,80,64,0.08)',  border: 'rgba(232,80,64,0.35)',  text: '#e85040' },
@@ -34,7 +34,7 @@ export default function HazardGraph({ hazards }) {
   return (
     <div className="rounded border border-[#1a3050] bg-[#0c1829] overflow-hidden">
       <div className="px-3 py-1.5 border-b border-[#1a3050] flex items-center gap-3">
-        <span className="text-[11px] font-mono text-[#506880]">dependente RAW</span>
+        <span className="text-[11px] font-mono text-[#506880]">RAW dependencies</span>
         {stalls.length > 0 && (
           <span className="text-[9px] font-mono px-1.5 py-0.5 rounded"
             style={{ background: 'rgba(232,80,64,0.12)', color: '#e85040', border: '1px solid rgba(232,80,64,0.3)' }}>
@@ -53,16 +53,16 @@ export default function HazardGraph({ hazards }) {
         <table className="w-full text-[11px] border-collapse">
           <thead className="sticky top-0 bg-[#0c1829] z-10">
             <tr style={{ borderBottom: '1px solid #1a3050', color: '#2a3c50' }}>
-              <th className={th}>tip</th>
-              <th className={th}>produce</th>
+              <th className={th}>type</th>
+              <th className={th}>produces</th>
               <th className={th}></th>
-              <th className={th}>consuma</th>
-              <th className={th}>registru</th>
-              <th className={th + ' text-right'}>distanta</th>
+              <th className={th}>consumes</th>
+              <th className={th}>register</th>
+              <th className={th + ' text-right'}>distance</th>
             </tr>
           </thead>
           <tbody>
-            {/* stall-urile primele ca sunt mai importante */}
+            {/* stalls first — more important */}
             {stalls.map((h, i) => <Row key={`s${i}`} h={h} />)}
             {forwards.map((h, i) => <Row key={`f${i}`} h={h} />)}
           </tbody>

@@ -1,6 +1,6 @@
-// diagrama Gantt clasica din arhitectura calculatoarelor
-// fiecare bara e proportionala cu numarul de cicluri petrecute in etapa respectiva
-// latimea mare a unui bar = stall (instructiunea a asteptat in etapa aceea)
+// classic Gantt diagram from computer architecture
+// each bar is proportional to the number of cycles spent in that stage
+// a wide bar = stall (the instruction waited in that stage)
 
 const STAGE_COLOR = {
   IF:  '#1e4060',
@@ -13,7 +13,7 @@ const STAGE_TEXT = {
   IF: '#4a80a8', ID: '#3a6080', EX: '#38d499', MEM: '#e8a838', WB: '#9d7bda',
 }
 
-const CELL = 20  // pixeli per ciclu
+const CELL = 20  // pixels per cycle
 
 function abbrev(instr) {
   return instr.length > 22 ? instr.slice(0, 21) + '…' : instr
@@ -78,11 +78,11 @@ export default function Timeline({ stats }) {
   const entries = Object.values(stats.timeline)
   if (!entries.length) return null
 
-  // nu afisam pentru programe prea mari — diagrama devine ilizibila
+  // don't render for large programs — the diagram becomes unreadable
   if (entries.length > 30) return (
     <div className="rounded border border-[#1a3050] bg-[#0c1829] px-3 py-2">
       <span className="text-[11px] font-mono text-[#506880]">
-        pipeline timeline — disponibil pentru ≤30 instrucțiuni ({entries.length} găsite)
+        pipeline timeline — available for ≤30 instructions ({entries.length} found)
       </span>
     </div>
   )
@@ -90,7 +90,7 @@ export default function Timeline({ stats }) {
   const maxCycle = stats.total_cycles ?? Math.max(...entries.map(e => (e.WB ?? 0) + 1))
   const totalW = (maxCycle + 1) * CELL
 
-  // afisam headerul cu numerele ciclurilor — din 5 in 5 daca sunt prea multe
+  // show the cycle-number header — every 5 if there are too many
   const step = maxCycle > 40 ? 10 : maxCycle > 20 ? 5 : 1
   const ticks = Array.from({ length: maxCycle + 1 }, (_, i) => i).filter(i => i % step === 0)
 
@@ -98,11 +98,11 @@ export default function Timeline({ stats }) {
     <div className="rounded border border-[#1a3050] bg-[#0c1829] overflow-hidden">
       <div className="px-3 py-1.5 border-b border-[#1a3050] flex items-center gap-3">
         <span className="text-[11px] font-mono text-[#506880]">pipeline timeline</span>
-        <span className="text-[10px] font-mono text-[#2a3c50]">{maxCycle} cicluri · {entries.length} instrucțiuni</span>
+        <span className="text-[10px] font-mono text-[#2a3c50]">{maxCycle} cycles · {entries.length} instructions</span>
       </div>
 
       <div className="p-3 overflow-x-auto">
-        {/* header cicluri */}
+        {/* cycle header */}
         <div className="flex" style={{ marginBottom: 4, paddingLeft: 140 }}>
           <div style={{ position: 'relative', width: totalW, height: 14 }}>
             {ticks.map(c => (
@@ -123,10 +123,10 @@ export default function Timeline({ stats }) {
           </div>
         </div>
 
-        {/* linii cu instructiunile */}
+        {/* instruction rows */}
         {entries.map((entry, i) => <GanttRow key={i} entry={entry} />)}
 
-        {/* legenda */}
+        {/* legend */}
         <div className="flex gap-3 mt-3 flex-wrap">
           {Object.entries(STAGE_COLOR).map(([name, bg]) => (
             <div key={name} className="flex items-center gap-1">
@@ -134,7 +134,7 @@ export default function Timeline({ stats }) {
               <span style={{ fontSize: 9, fontFamily: 'monospace', color: STAGE_TEXT[name] }}>{name}</span>
             </div>
           ))}
-          <span style={{ fontSize: 9, fontFamily: 'monospace', color: '#2a3c50' }}>· golul dintre bare = ciclu de stall</span>
+          <span style={{ fontSize: 9, fontFamily: 'monospace', color: '#2a3c50' }}>· gap between bars = stall cycle</span>
         </div>
       </div>
     </div>

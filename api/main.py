@@ -189,7 +189,7 @@ def create_session(req: SimConfig):
 def step(sid: str):
     entry = sessions.get(sid)
     if not entry:
-        raise HTTPException(status_code=404, detail="session negasita")
+        raise HTTPException(status_code=404, detail="session not found")
     entry["last_accessed"] = time.time()
     pipeline = entry["pipeline"]
     if pipeline.cycle == 0 or not pipeline.is_done():
@@ -200,7 +200,7 @@ def step(sid: str):
 @app.delete("/session/{sid}")
 def delete_session(sid: str):
     if sid not in sessions:
-        raise HTTPException(status_code=404, detail="session negasita")
+        raise HTTPException(status_code=404, detail="session not found")
     del sessions[sid]
     return {"deleted": sid}
 
