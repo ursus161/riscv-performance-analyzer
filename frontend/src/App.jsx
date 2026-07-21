@@ -5,6 +5,8 @@ import Registers from './components/Registers'
 import Memory from './components/Memory'
 import Stats from './components/Stats'
 import Controls from './components/Controls'
+import HazardGraph from './components/HazardGraph'
+import Timeline from './components/Timeline'
 
 const API = '/api'
 
@@ -70,7 +72,7 @@ export default function App() {
   const [editorWidth, setEditorWidth] = useState(() =>
     parseInt(localStorage.getItem('editor-width') ?? '400')
   )
-  const [config, setConfig] = useState({ use_cache: false, use_branch_predictor: false })
+  const [config, setConfig] = useState({ use_cache: true, use_branch_predictor: true })
   const [pipelineState, setPipelineState] = useState(null)
   const [prevState, setPrevState] = useState(null)
   const [stats, setStats] = useState(null)
@@ -78,11 +80,19 @@ export default function App() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const [mode, setMode] = useState(null)
+  const [examples, setExamples] = useState([])
   const sessionId = useRef(null)
   const isDragging = useRef(false)
   const widthRef = useRef(editorWidth)
 
   useEffect(() => { localStorage.setItem('riscv-code', code) }, [code])
+
+  useEffect(() => {
+    fetch(`${API}/examples`)
+      .then(r => r.json())
+      .then(setExamples)
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const onMove = (e) => {
@@ -212,7 +222,14 @@ export default function App() {
         .map(([name, s]) => ({ stage: name, instr: s.instruction }))
     : []
 
-  // Status bar text
+  const stallData = stats?.per_instruction_stalls
+    ? Object.values(stats.per_instruction_stalls).reduce((acc, s) => {
+        if (s.source_line != null && s.total > 0)
+          acc[s.source_line] = (acc[s.source_line] ?? 0) + s.total
+        return acc
+      }, {})
+    : null
+
   const statusMode = loading ? 'running…'
     : isDone ? 'done'
     : inStep ? `step · cycle ${pipelineState?.cycle ?? 0}`
@@ -261,8 +278,21 @@ export default function App() {
         >
           <div className="px-3 py-1.5 border-b shrink-0 flex items-center gap-2" style={{ borderColor: '#1a3050', background: '#0c1829' }}>
             <span className="text-[11px] font-mono" style={{ color: '#506880' }}>editor</span>
+            {examples.length > 0 && (
+              <select
+                defaultValue=""
+                onChange={e => { if (e.target.value) { setCode(examples.find(x => x.name === e.target.value)?.code ?? ''); e.target.value = '' } }}
+                className="ml-auto text-[11px] font-mono rounded-sm px-1.5 py-0.5 border outline-none cursor-pointer"
+                style={{ background: '#08111e', color: '#506880', borderColor: '#1a3050' }}
+              >
+                <option value="" disabled>examples</option>
+                {examples.map(ex => (
+                  <option key={ex.name} value={ex.name}>{ex.label}</option>
+                ))}
+              </select>
+            )}
           </div>
-          <Editor code={code} onChange={setCode} activeStages={activeStages} />
+          <Editor code={code} onChange={setCode} activeStages={activeStages} stallData={stallData} />
 
           {error && (
             <div className="shrink-0 border-t p-2.5" style={{ borderColor: 'rgba(232,80,64,0.3)', background: 'rgba(232,80,64,0.07)' }}>
@@ -292,6 +322,8 @@ export default function App() {
           {(stats || pipelineState) && (
             <Stats stats={stats} state={pipelineState} config={config} compareStats={compareStats} />
           )}
+          <HazardGraph hazards={stats?.hazards} />
+          <Timeline stats={stats} />
         </div>
       </div>
 

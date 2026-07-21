@@ -7,24 +7,28 @@ class CacheLine:
         self.tag = 0
         self.dirty = False
         self.lru_counter = 0  # pentru find_victim_lru
+        self.prefetched = False  # linie incarcata speculativ, nu demand
 
     def __repr__(self):
         if not self.valid:
             return "[gol]"
         dirty_mark = "*" if self.dirty else ""
-        return f"[tag={self.tag:#x}{dirty_mark}]"
+        prefetch_mark = "P" if self.prefetched else ""
+        return f"[tag={self.tag:#x}{dirty_mark}{prefetch_mark}]"
 
 
 class Cache:
 
     def __init__(self, size=256, line_size=16, associativity=2,
-                 write_policy='write-back', hit_latency=1, ram_latency=50):
+                 write_policy='write-back', hit_latency=1, ram_latency=50,
+                 prefetch_enabled=False):
         self.size = size
         self.line_size = line_size
         self.associativity = associativity
         self.write_policy = write_policy
         self.hit_latency = hit_latency
         self.ram_latency = ram_latency
+        self.prefetch_enabled = prefetch_enabled
 
 
         self.num_lines = size // line_size
@@ -48,6 +52,8 @@ class Cache:
         self.misses = 0
         self.evictions = 0
         self.write_backs = 0
+        self.prefetch_inserts = 0
+        self.prefetch_hits = 0
 
     def _decode_address(self, address):
 
@@ -74,6 +80,9 @@ class Cache:
             if line.valid and line.tag == tag: #hit
 
                 self.hits += 1
+                if line.prefetched:
+                    self.prefetch_hits += 1
+                    line.prefetched = False
                 self._update_lru(cache_set, way_idx)
 
                 if is_write:
@@ -103,7 +112,11 @@ class Cache:
         victim.valid = True
         victim.tag = tag
         victim.dirty = is_write and (self.write_policy == 'write-back')
+        victim.prefetched = False
         self._update_lru(cache_set, victim_idx)
+
+        if self.prefetch_enabled:
+            self._prefetch_next_line(address)
 
         #logica pt politica write-through, simpla dar ffff inceata
         #pt ca de fiecare data imi rescrie in RAM
@@ -112,6 +125,33 @@ class Cache:
             return (False, self.ram_latency + self.ram_latency + write_back_latency)
         else:
             return (False, self.ram_latency + write_back_latency)
+
+    def _prefetch_next_line(self, address):
+        # urmatoarea linie contigua in memorie
+        next_addr = ((address >> self.offset_bits) + 1) << self.offset_bits
+        tag, index, _ = self._decode_address(next_addr)
+
+        if index >= len(self.sets):
+            return
+
+        cache_set = self.sets[index]
+
+        # deja in cache — nu face nimic
+        for line in cache_set:
+            if line.valid and line.tag == tag:
+                return
+
+        # instalam DOAR intr-un way gol; daca nu exista, nu evictam nimic
+        # asta previne overfetching / cache pollution
+        for way_idx, line in enumerate(cache_set):
+            if not line.valid:
+                line.valid = True
+                line.tag = tag
+                line.dirty = False
+                line.prefetched = True
+                self._update_lru(cache_set, way_idx)
+                self.prefetch_inserts += 1
+                return
 
     def _find_lru_victim(self, cache_set):
 
@@ -144,6 +184,11 @@ class Cache:
         # AMAT = average memory access time = hit_time + miss_rate x miss_penalty
         amat = self.hit_latency + miss_rate * self.ram_latency
 
+        prefetch_coverage = (
+            round(self.prefetch_hits / self.misses, 2)
+            if self.misses > 0 else 0
+        )
+
         return {
             'hits': self.hits,
             'misses': self.misses,
@@ -152,7 +197,10 @@ class Cache:
             'miss_rate': round(miss_rate, 2),
             'evictions': self.evictions,
             'write_backs': self.write_backs,
-            'amat': round(amat, 2)
+            'amat': round(amat, 2),
+            'prefetch_inserts': self.prefetch_inserts,
+            'prefetch_hits': self.prefetch_hits,
+            'prefetch_coverage': prefetch_coverage,
         }
 
     def _validate_data(self):

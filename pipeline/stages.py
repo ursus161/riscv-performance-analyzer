@@ -27,6 +27,7 @@ class IFStage(PipelineStage):
         instr.pc = self.pipeline.pc
         self.pipeline.pc += 1
         self.instruction = instr
+        instr._t_if = self.pipeline.cycle  # primul ciclu in IF, folosit in Gantt
 
         if instr.is_branch() and self.pipeline.branch_predictor:
             predicted, _ = self.pipeline.branch_predictor.predict(instr.pc)
@@ -70,13 +71,17 @@ class IDStage(PipelineStage):
             return
 
         if self._detect_load_use_hazard():
-            # stall
+            # stall — instructiunea ramane in IF, ID emite bubble
+            # stall-ul e atribuit instructiunii load din EX, care e cauza lui
+            ex_instr = self.pipeline.stages['EX'].instruction
             self.pipeline.load_use_stall_cycles += 1
+            self.pipeline._add_stall(ex_instr.pc, 'load_use', 1)
             self.pipeline.stages['IF'].instruction = self.instruction #aici dau feed la stall
             self.instruction = None
             return
 
         self.pipeline.stages['IF'].instruction = None
+        self.instruction._t_id = self.pipeline.cycle  # ciclul cand trece efectiv prin ID (dupa stall)
 
         if self.instruction.rs1 is not None:
             self.data['rs1_value'] = self.pipeline.registers.read(self.instruction.rs1)
@@ -138,9 +143,10 @@ class EXStage(PipelineStage):
 
         self.clear_data()
 
-
         if self.instruction is None:
             return
+
+        self.instruction._t_ex = self.pipeline.cycle
 
         match self.instruction.opcode:
             case "add":
@@ -245,6 +251,8 @@ class MEMStage(PipelineStage):
         if self.instruction is None:
             return
 
+        self.instruction._t_mem = self.pipeline.cycle
+
         if self.instruction.is_load():
             address = prev_data['address']
             if self.pipeline.memory.cache:
@@ -257,6 +265,7 @@ class MEMStage(PipelineStage):
                 self.pipeline.memory.ram_accesses += 1
                 self.stall_cycles = self.pipeline.ram_latency - 1
             self.pipeline.mem_stall_cycles += self.stall_cycles
+            self.pipeline._add_stall(self.instruction.pc, 'mem_stall', self.stall_cycles)
             match self.instruction.opcode:
                 case "lw":
                     self.data['result'] = self.pipeline.memory.read(address)
@@ -288,6 +297,7 @@ class MEMStage(PipelineStage):
                 self.pipeline.memory.ram_accesses += 1
                 self.stall_cycles = self.pipeline.ram_latency - 1
             self.pipeline.mem_stall_cycles += self.stall_cycles
+            self.pipeline._add_stall(self.instruction.pc, 'mem_stall', self.stall_cycles)
             match self.instruction.opcode:
                 case "sw":
                     self.pipeline.memory.write(address, value)
@@ -314,13 +324,25 @@ class WBStage(PipelineStage):
         self.instruction = self.pipeline.stages['MEM'].instruction
         prev_data = self.pipeline.stages['MEM'].data
         self.pipeline.stages['MEM'].instruction = None
-        
+
         self.clear_data()
 
         if self.instruction is None:
             return
 
         self.pipeline.executed_count += 1
+
+        # inregistram ciclul de intrare in WB si completam intrarea din timeline
+        t_wb = self.pipeline.cycle
+        self.pipeline.timeline[self.instruction.pc] = {
+            'IF':  getattr(self.instruction, '_t_if',  None),
+            'ID':  getattr(self.instruction, '_t_id',  None),
+            'EX':  getattr(self.instruction, '_t_ex',  None),
+            'MEM': getattr(self.instruction, '_t_mem', None),
+            'WB':  t_wb,
+            'instr': str(self.instruction),
+            'source_line': self.instruction.source_line,
+        }
 
         if not self.instruction.is_store() and self.instruction.rd is not None:
             result = prev_data.get('result', 0)
