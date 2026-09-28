@@ -1,9 +1,12 @@
 #pragma once
-#include "../cpu/cpu.hpp"
+#include <expected>
+
 #include "../isa/isa.hpp"
+#include "../machine.hpp"
+#include "trap.hpp"
 
 namespace emu {
 
-void execute(Cpu& cpu, const Instruction& in);
+std::expected<void, Trap> execute(Machine& m, const Instruction& in);
 
 } // namespace emu

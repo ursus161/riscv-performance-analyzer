@@ -10,6 +10,7 @@ option(ENABLE_SANITIZERS "ASan + UBSan" OFF)
 add_executable(emu
   emu/main.cpp
   emu/decode/decoder.cpp
+  emu/exec/execute.cpp
 )
 target_include_directories(emu PRIVATE emu)
 target_compile_options(emu PRIVATE -Wall -Wextra -Wpedantic -Werror)
