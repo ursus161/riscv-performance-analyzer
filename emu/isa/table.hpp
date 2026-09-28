@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <cstddef>
 #include <cstdint>
 
 #include "isa.hpp"
@@ -69,5 +70,27 @@ inline constexpr std::array<InstrSpecifications, 40> kRV32I = {{
     {0xffffffff, 0x00000073, Op::ECALL,  Format::I, "ecall"},
     {0xffffffff, 0x00100073, Op::EBREAK, Format::I, "ebreak"},
 }};
+
+// a table entry can only be reached by decode() if no earlier entry also matches it.
+// two entries overlap iff they agree on every bit both masks care about.
+consteval bool no_overlap(const auto& table) {
+    for (std::size_t i = 0; i < table.size(); ++i)
+        for (std::size_t j = i + 1; j < table.size(); ++j) {
+            const auto& a = table[i];
+            const auto& b = table[j];
+            if (((a.match ^ b.match) & a.mask & b.mask) == 0) return false;
+        }
+    return true;
+}
+
+// every match bit must lie inside its mask, or the entry can never match.
+consteval bool matches_within_masks(const auto& table) {
+    for (const auto& s : table)
+        if ((s.match & ~s.mask) != 0) return false;
+    return true;
+}
+
+static_assert(no_overlap(kRV32I));
+static_assert(matches_within_masks(kRV32I));
 
 }  
