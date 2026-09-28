@@ -13,6 +13,7 @@ venv/
 # Testing (local)
 teste/
 *.txt
+!CMakeLists.txt
 
 # Frontend
 frontend/node_modules/
