@@ -7,8 +7,9 @@ namespace emu {
 // just a subset of the codes are implemented here, but more can be added later.
 enum class TrapCause : std::uint8_t {
     InstrMisaligned = 0, InstrAccessFault = 1, IllegalInstr = 2, Breakpoint = 3,
-    LoadMisaligned = 4, LoadAccessFault = 5, StoreMisaligned = 6, StoreAccessFault = 7,
-    EcallM = 11,
+    LoadMisaligned = 4, LoadAccessFault = 5, StoreMisaligned = 6, StoreAccessFault = 7, 
+    ECallU = 8, ECallM = 11, 
+    PageFaultInstr = 12, PageFaultLoad = 13, PageFaultStore = 15
 };
 
 struct Trap {
