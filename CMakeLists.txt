@@ -8,9 +8,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(ENABLE_SANITIZERS "ASan + UBSan" OFF)
 
 add_executable(emu
-  emu/main.cpp
-  emu/decode/decoder.cpp
-  emu/exec/execute.cpp
+    emu/main.cpp
+    emu/decode/decoder.cpp
+    emu/exec/execute.cpp
+    emu/run/run.cpp
+    emu/run/syscall.cpp
 )
 target_include_directories(emu PRIVATE emu)
 target_compile_options(emu PRIVATE -Wall -Wextra -Wpedantic -Werror)

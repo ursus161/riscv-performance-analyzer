@@ -1,38 +1,57 @@
+#include <chrono>
 #include <cstdio>
+#include <iterator>
 
-#include "decode/decoder.hpp"
-#include "exec/execute.hpp"
+#include "isa/reg.hpp"
+#include "run/run.hpp"
 
 using namespace emu;
 
-int main() {
-    Machine m{Cpu{}, Memory{0x80000000, 4096}};
+namespace {
 
-    // sum 1..10 into a0, then ecall
-    const std::uint32_t program[] = {
-        0x00000513,  // addi a0, x0, 0      a0 = 0
-        0x00100293,  // addi t0, x0, 1      t0 = 1
-        0x00b00313,  // addi t1, x0, 11     t1 = 11
-        0x00550533,  // add  a0, a0, t0     a0 += t0       
-        0x00128293,  // addi t0, t0, 1      t0++
-        0xfe629ce3,  // bne  t0, t1, -8     if t0 != 11 goto loop, could use a branch predictor later here 
-        0x00000073,  // ecall
-    };
+constexpr std::uint32_t kRamBase = 0x80000000;
 
-    for (std::uint32_t i = 0; i < std::size(program); ++i)
-        (void)m.mem.store<std::uint32_t>(0x80000000 + 4 * i, program[i]);
-    m.cpu.pc = 0x80000000;
+// Count to ~50M: ~100M instructions, long enough for a stable MIPS measurement.
+constexpr std::uint32_t kBenchLoop[] = {
+    0x00000293,  // addi t0, x0, 0
+    0x02faf337,  // lui  t1, 0x2faf        t1 = 50,003,968
+    0x00128293,  // addi t0, t0, 1         <- loop
+    0xfe629ee3,  // bne  t0, t1, -4
+    0x05d00893,  // addi a7, x0, 93        exit(a0)
+    0x00000073,  // ecall
+};
 
-    for (int steps = 0; steps < 1000; ++steps) {
-        auto word = m.mem.load<std::uint32_t>(m.cpu.pc);   // fetch
-        if (!word) [[unlikely]] { std::puts("fetch fault"); return 1; } // trusting myself :) marking it as unsafe for the smarter than me bp to optimize
+void load_program(Machine& m, const std::uint32_t* words, std::size_t count) {
+    for (std::size_t i = 0; i < count; ++i)
+        (void)m.mem.store<std::uint32_t>(kRamBase + 4 * static_cast<std::uint32_t>(i), words[i]);
+    m.cpu.pc = kRamBase;
+}
 
-        auto result = execute(m, decode(*word));            // decode + execute
-        if (!result) [[unlikely]] { // same
-            std::printf("trap %d at pc=0x%08x, a0=%u\n",
-                        static_cast<int>(result.error().cause), m.cpu.pc, m.cpu.reg(10)); //10th reg is obv t10
-            return 0;
-        }
+void report(const RunResult& r, const Machine& m, double seconds) {
+    switch (r.reason) {
+        case StopReason::Exit:
+            std::printf("exit code %d\n", r.exit_code);
+            break;
+        case StopReason::Trap:
+            std::printf("trap %d at pc=0x%08x\n", static_cast<int>(r.trap.cause), m.cpu.pc);
+            break;
+        case StopReason::StepLimit:
+            std::puts("step limit reached");
+            break;
     }
-    std::puts("step limit reached");
+    std::printf("%lu instructions, %.3f s, %.1f MIPS\n",
+                static_cast<unsigned long>(r.steps), seconds, r.steps / seconds / 1e6);
+}
+
+} // namespace
+
+int main() {
+    Machine m{Cpu{}, Memory{kRamBase, 4096}};
+    load_program(m, kBenchLoop, std::size(kBenchLoop));
+
+    auto t0 = std::chrono::steady_clock::now();
+    RunResult r = run(m);
+    auto t1 = std::chrono::steady_clock::now();
+
+    report(r, m, std::chrono::duration<double>(t1 - t0).count());
 }

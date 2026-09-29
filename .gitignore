@@ -24,3 +24,7 @@ frontend/.vite/
 .DS_Store
 Thumbs.dbbuild/
 build/
+
+
+#Development
+build-release/
