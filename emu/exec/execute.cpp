@@ -66,6 +66,73 @@ std::expected<void, Trap> execute(Machine& m, const Instruction& in) {
         case Op::BGEU: taken = a >= b; break;
 
         case Op::FENCE: break;
+
+
+        //cases for load store instructions
+        case Op::LW: {
+            std::uint32_t addr = a + imm;
+            auto v = m.mem.load<std::uint32_t>(addr);
+            if (!v) return std::unexpected(Trap{TrapCause::LoadAccessFault, addr});
+            cpu.set_reg(in.rd, *v);
+            break;
+        }
+
+        case Op::LB: {
+            std::uint32_t addr = a + imm;
+            auto v = m.mem.load<std::uint8_t>(addr);
+            if (!v) return std::unexpected(Trap{TrapCause::LoadAccessFault, addr});
+            cpu.set_reg(in.rd, static_cast<std::uint32_t>(static_cast<std::int8_t>(*v)));
+            break;
+        }
+
+        case Op::LH: {
+            std::uint32_t addr = a + imm;
+            auto v = m.mem.load<std::uint16_t>(addr);
+            if (!v) return std::unexpected(Trap{TrapCause::LoadAccessFault, addr});
+            cpu.set_reg(in.rd, static_cast<std::uint32_t>(static_cast<std::int16_t>(*v)));
+            break;
+        }
+
+        case Op::LBU: {
+            std::uint32_t addr = a + imm;
+            auto v = m.mem.load<std::uint8_t>(addr);
+            if (!v) return std::unexpected(Trap{TrapCause::LoadAccessFault, addr});
+            cpu.set_reg(in.rd, static_cast<std::uint32_t>(*v));
+            break;
+        }
+
+        case Op::LHU: {
+            std::uint32_t addr = a + imm;
+            auto v = m.mem.load<std::uint16_t>(addr);
+            if (!v) return std::unexpected(Trap{TrapCause::LoadAccessFault, addr});
+            cpu.set_reg(in.rd, static_cast<std::uint32_t>(*v));
+            break;
+        }
+
+        case Op::SW: {
+            std::uint32_t addr = a + imm;
+            if (!m.mem.store<std::uint32_t>(addr, b)) 
+                return std::unexpected(Trap{TrapCause::StoreAccessFault, addr});
+            break;
+        }
+
+        case Op::SB: {
+            std::uint32_t addr = a + imm;
+            if (!m.mem.store<std::uint8_t>(addr, static_cast<std::uint8_t>(b))) 
+                return std::unexpected(Trap{TrapCause::StoreAccessFault, addr});
+            break;
+        }
+
+        case Op::SH: {
+            std::uint32_t addr = a + imm;
+            if (!m.mem.store<std::uint16_t>(addr, static_cast<std::uint16_t>(b))) 
+                return std::unexpected(Trap{TrapCause::StoreAccessFault, addr});
+            break;
+        }
+
+        case Op::ECALL: return std::unexpected(Trap{TrapCause::ECallM, 0});
+        case Op::EBREAK: return std::unexpected(Trap{TrapCause::Breakpoint, 0});
+        
         default: return std::unexpected(Trap{TrapCause::IllegalInstr, 0});
     }
 
